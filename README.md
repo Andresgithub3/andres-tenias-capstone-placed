@@ -146,14 +146,13 @@ Users will access the application throughout their workday, primarily from deskt
 
 ### Mockups
 
-[Note: I will create hand-drawn sketches or use Figma to produce mockups of the following key screens]
+[Note: I have also included a pdf with various mockups. These could change slightly as the project develops.]
 
-1. Dashboard View (Desktop and Mobile)
+1. Dashboard View (Desktop)
 2. Candidate Profile Page
 3. Assessment Builder Interface
-4. Analytics Dashboard
-5. Predictions/Forecast View
-6. Mobile Navigation and Responsive Design Elements
+4. Forms used (Add Candidates, Add Interview, Add Job)
+5. Hiring Manager Dashboard View 
 
 ### Data
 
