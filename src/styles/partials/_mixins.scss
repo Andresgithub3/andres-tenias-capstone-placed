@@ -1,15 +1,16 @@
 @use "./variables" as *;
 
 @font-face {
-  font-family: "Titillium Web";
-  src: url("../../assets/Font/TitilliumWeb-Regular.ttf") format("truetype");
+  font-family: 'Titillium Web';
+  src: url('../../assets/Font/TitilliumWeb-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
+  
 }
 
 @font-face {
-  font-family: "Titillium Web";
-  src: url("../../assets/Font/TitilliumWeb-SemiBold.ttf") format("truetype");
+  font-family: 'Titillium Web';
+  src: url('../../assets/Font/TitilliumWeb-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
 }

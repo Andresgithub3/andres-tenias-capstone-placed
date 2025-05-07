@@ -1,5 +1,5 @@
-@use "./partials/mixins.scss";
-@use "./partials/variables" as *;
+@use "./partials/mixins.scss" as *;
+@use "./partials/variables.scss" as *;
 
 * {
   margin: 0;
@@ -8,8 +8,8 @@
 }
 
 body {
-  font-family: "Titillium Web", sans-serif;
+  font-family: $primary-font;
   line-height: 1.6;
-  color: black;
-  background-color: whitesmoke;
+  color: $primary-text;
+  background-color: $background;
 }

@@ -1,3 +1,28 @@
+@font-face {
+  font-family: "Titillium Web";
+  src: url("../../assets/Font/TitilliumWeb-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Titillium Web";
+  src: url("../../assets/Font/TitilliumWeb-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Titillium Web", sans-serif;
+  line-height: 1.6;
+  color: #13182C;
+  background-color: #FFFFFF;
+}
+
 .auth-container {
   display: flex;
   justify-content: center;
