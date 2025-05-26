@@ -1,0 +1,15 @@
+@use "./partials/mixins.scss" as *;
+@use "./partials/variables.scss" as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $primary-font;
+  line-height: 1.6;
+  color: $primary-text;
+  background-color: $background;
+}
