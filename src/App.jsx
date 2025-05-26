@@ -75,7 +75,7 @@ import {
   People as PeopleIcon,
   Dashboard as DashboardIcon,
 } from "@mui/icons-material";
-import { useTheme } from "./contexts/ThemeContext";
+import { useTheme } from "./theme context/ThemContext";
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
