@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Grid,
   Card,
@@ -176,7 +175,7 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {dashboardStats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 3}} key={index}>
             <StatCard stat={stat} />
           </Grid>
         ))}
@@ -185,7 +184,7 @@ const Dashboard = () => {
       {/* Main Content Grid */}
       <Grid container spacing={3}>
         {/* Recent Activities */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6">Recent Activities</Typography>
@@ -236,7 +235,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Upcoming Interviews */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6">Today's Interviews</Typography>
@@ -300,13 +299,13 @@ const Dashboard = () => {
         </Grid>
 
         {/* Quick Actions */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Quick Actions
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button
                   variant="outlined"
                   fullWidth
@@ -316,7 +315,7 @@ const Dashboard = () => {
                   Create New Job
                 </Button>
               </Grid>
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button
                   variant="outlined"
                   fullWidth
@@ -326,7 +325,7 @@ const Dashboard = () => {
                   Add Candidate
                 </Button>
               </Grid>
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button
                   variant="outlined"
                   fullWidth
@@ -336,7 +335,7 @@ const Dashboard = () => {
                   Schedule Interview
                 </Button>
               </Grid>
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button
                   variant="outlined"
                   fullWidth
