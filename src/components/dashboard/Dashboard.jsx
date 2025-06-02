@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Grid,
   Card,
@@ -11,7 +12,7 @@ import {
   ListItemIcon,
   Chip,
   Button,
-} from '@mui/material';
+} from "@mui/material";
 import {
   TrendingUp,
   People,
@@ -21,7 +22,7 @@ import {
   CheckCircle,
   Schedule,
   Person,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Mock data - will be replaced with real data later
 const dashboardStats = [
@@ -175,7 +176,7 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {dashboardStats.map((stat, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3}} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
             <StatCard stat={stat} />
           </Grid>
         ))}
@@ -218,15 +219,16 @@ const Dashboard = () => {
                   <ListItemText
                     primary={activity.title}
                     secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
+                      <Box component="span" sx={{ display: 'block' }}>
+                        <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block' }}>
                           {activity.subtitle}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
                           {activity.time}
                         </Typography>
                       </Box>
                     }
+                    secondaryTypographyProps={{ component: 'div' }}
                   />
                 </ListItem>
               ))}
@@ -268,19 +270,19 @@ const Dashboard = () => {
                   </ListItemIcon>
                   <ListItemText
                     primary={
-                      <Box>
-                        <Typography variant="body2" fontWeight="medium">
+                      <Box component="span" sx={{ display: 'block' }}>
+                        <Typography variant="body2" fontWeight="medium" component="span" sx={{ display: 'block' }}>
                           {interview.candidate}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
                           {interview.position} • {interview.company}
                         </Typography>
                       </Box>
                     }
                     secondary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }} component="span">
                         <Schedule fontSize="small" />
-                        <Typography variant="caption">
+                        <Typography variant="caption" component="span">
                           {interview.time}
                         </Typography>
                         <Chip
@@ -291,6 +293,8 @@ const Dashboard = () => {
                         />
                       </Box>
                     }
+                    primaryTypographyProps={{ component: 'div' }}
+                    secondaryTypographyProps={{ component: 'div' }}
                   />
                 </ListItem>
               ))}
