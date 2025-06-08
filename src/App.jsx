@@ -1,29 +1,39 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { useAuth } from './contexts/AuthContext';
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useAuth } from "./contexts/AuthContext";
+// import { supabase } from "./api/client/supabase"; used this to test connection to Supabase
 
 // Auth Components
-import Login from './components/auth/Login';
-import Signup from './components/auth/Signup';
-import ForgotPassword from './components/auth/ForgotPassword';
+import Login from "./components/auth/Login";
+import Signup from "./components/auth/Signup";
+import ForgotPassword from "./components/auth/ForgotPassword";
+
+// Database tester component
+import DatabaseTester from "./components/DatabaseTester";
 
 // Layout Components
-import AppLayout from './components/layout/AppLayout';
+import AppLayout from "./components/layout/AppLayout";
 
 // Page Components
-import Dashboard from './components/dashboard/Dashboard';
-import { Jobs, Candidates, Interviews, Companies, Analytics } from './components/pages/pages';
+import Dashboard from "./components/dashboard/Dashboard";
+import {
+  Jobs,
+  Candidates,
+  Interviews,
+  Companies,
+  Analytics,
+} from "./components/pages/pages";
 
 // Loading Component
 const LoadingScreen = () => (
   <Box
     sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
       gap: 2,
     }}
   >
@@ -57,44 +67,92 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
+  // // State to hold the Supabase connection test status
+  // const [supabaseConnectionStatus, setSupabaseConnectionStatus] = useState(
+  //   "Checking Supabase connection..."
+  // );
+
+  // // useEffect hook to run the Supabase connection test once on component mount
+  // useEffect(() => {
+  //   const testSupabaseConnection = async () => {
+  //     try {
+  //       // Attempt to get the current session. This is a common way to test
+  //       // if the Supabase client can reach the backend.
+  //       const {
+  //         data: { session },
+  //         error,
+  //       } = await supabase.auth.getSession();
+
+  //       if (error) {
+  //         // If there's an error, it means the connection failed or keys are wrong
+  //         setSupabaseConnectionStatus(
+  //           `Supabase Connection Error: ${error.message}`
+  //         );
+  //         console.error("Supabase connection test failed:", error);
+  //       } else if (session) {
+  //         // If a session exists, the connection is good and a user is logged in
+  //         setSupabaseConnectionStatus(
+  //           `Supabase Connected! User: ${session.user.email}`
+  //         );
+  //         console.log("Supabase session:", session);
+  //       } else {
+  //         // If no error and no session, the connection is good but no user is logged in
+  //         setSupabaseConnectionStatus(
+  //           "Supabase Connected! No active session (user not logged in)."
+  //         );
+  //         console.log("Supabase connection successful, no active session.");
+  //       }
+  //     } catch (err) {
+  //       // Catch any errors during the initial creation or call to supabase
+  //       setSupabaseConnectionStatus(
+  //         `Supabase Initialization Error: ${err.message}`
+  //       );
+  //       console.error("Supabase initialization failed:", err);
+  //     }
+  //   };
+
+  //   testSupabaseConnection();
+  // }, []); // The empty dependency array ensures this runs only once when App mounts
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             <PublicRoute>
               <Login />
             </PublicRoute>
-          } 
+          }
         />
-        <Route 
-          path="/signup" 
+        <Route
+          path="/signup"
           element={
             <PublicRoute>
               <Signup />
             </PublicRoute>
-          } 
+          }
         />
-        <Route 
-          path="/forgot-password" 
+        <Route
+          path="/forgot-password"
           element={
             <PublicRoute>
               <ForgotPassword />
             </PublicRoute>
-          } 
+          }
         />
 
         {/* Protected Routes with Layout */}
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <ProtectedRoute>
               <AppLayout />
             </ProtectedRoute>
           }
         >
+          <Route path="test-db" element={<DatabaseTester />} />
           {/* Nested routes that will render inside AppLayout */}
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
