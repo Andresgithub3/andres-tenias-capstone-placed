@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useAuth } from "./contexts/AuthContext";
@@ -17,13 +16,9 @@ import AppLayout from "./components/layout/AppLayout";
 
 // Page Components
 import Dashboard from "./components/dashboard/Dashboard";
-import {
-  Jobs,
-  Candidates,
-  Interviews,
-  Companies,
-  Analytics,
-} from "./components/pages/pages";
+import CandidatesList from './components/pages/Candidates/CandidatesList';
+import CandidateDetail from "./components/pages/Candidates/CandidateDetail";
+// import JobsList from './components/pages/Jobs/JobsList';
 
 // Loading Component
 const LoadingScreen = () => (
@@ -156,11 +151,13 @@ function App() {
           {/* Nested routes that will render inside AppLayout */}
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="jobs" element={<Jobs />} />
-          <Route path="candidates" element={<Candidates />} />
-          <Route path="interviews" element={<Interviews />} />
-          <Route path="companies" element={<Companies />} />
-          <Route path="analytics" element={<Analytics />} />
+          {/* <Route path="jobs" element={<Jobs />} /> */}
+          {/* <Route path="candidates" element={<Candidates />} /> */}
+          <Route path="candidates" element={<CandidatesList />} />
+          <Route path="candidates/:id" element={<CandidateDetail />} />
+          {/* <Route path="interviews" element={<Interviews />} /> */}
+          {/* <Route path="companies" element={<Companies />} /> */}
+          {/* <Route path="analytics" element={<Analytics />} /> */}
         </Route>
 
         {/* Catch all route */}
