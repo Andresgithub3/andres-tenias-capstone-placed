@@ -128,7 +128,7 @@ const JobForm = () => {
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Left Column - Basic Info */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="h6" gutterBottom>
                 Basic Information
               </Typography>
@@ -229,14 +229,14 @@ const JobForm = () => {
             </Grid>
 
             {/* Right Column - Details */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="h6" gutterBottom>
                 Job Details
               </Typography>
 
               <TextField
                 fullWidth
-                label="Description *"
+                label="Description"
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}

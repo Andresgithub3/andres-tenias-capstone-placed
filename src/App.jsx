@@ -19,7 +19,7 @@ import Dashboard from "./components/dashboard/Dashboard";
 import CandidatesList from "./components/pages/Candidates/CandidatesList";
 import CandidateDetail from "./components/pages/Candidates/CandidateDetail";
 import JobsList from './components/pages/Jobs/JobsList';
-import { JobForm } from './components/pages/Jobs/JobForm';
+import JobForm from './components/pages/Jobs/JobForm';
 import { JobDetail } from './components/pages/Jobs/JobDetail';
 
 // Loading Component
