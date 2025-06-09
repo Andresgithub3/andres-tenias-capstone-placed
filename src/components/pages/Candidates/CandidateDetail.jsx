@@ -14,17 +14,22 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Snackbar,
+  ListItemIcon,
+  ListItemText
 } from "@mui/material";
 import {
   ArrowDropDown as ArrowDropDownIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
+  Work as WorkIcon,
 } from "@mui/icons-material";
 import { candidateService } from "../../../services/candidateService";
 import OverviewTab from "./OverviewTab";
 import DocumentsTab from "./DocumentsTab";
 import ActivityTab from "./ActivityTab";
+import JobAssociationDialog from "./JobAssociationDialog";
 
 // Pipeline stages
 const PIPELINE_STAGES = [
@@ -45,6 +50,12 @@ const CandidateDetail = () => {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [actionsAnchor, setActionsAnchor] = useState(null);
+  const [jobAssociationOpen, setJobAssociationOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const refreshCandidate = async () => {
     try {
@@ -72,6 +83,20 @@ const CandidateDetail = () => {
     }
   };
 
+  const handleJobAssociation = () => {
+    setJobAssociationOpen(true);
+  };
+
+  const handleJobAssociationSuccess = (message) => {
+    setSnackbar({ open: true, message, severity: "success" });
+    // Refresh candidate data to show new applications
+    loadCandidate();
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ open: false, message: "", severity: "success" });
+  };
+
   // Calculate highest pipeline stage
   const getCurrentPipelineStage = () => {
     if (!candidate?.applications || candidate.applications.length === 0) {
@@ -96,12 +121,6 @@ const CandidateDetail = () => {
 
   const handleActionsClose = () => {
     setActionsAnchor(null);
-  };
-
-  const handleAssociateWithJob = () => {
-    handleActionsClose();
-    // TODO: Open job association dialog
-    console.log("Associate with Job clicked");
   };
 
   const handleSubmitToClient = () => {
@@ -176,8 +195,11 @@ const CandidateDetail = () => {
             open={Boolean(actionsAnchor)}
             onClose={handleActionsClose}
           >
-            <MenuItem onClick={handleAssociateWithJob}>
-              Associate with Job
+            <MenuItem onClick={handleJobAssociation}>
+              <ListItemIcon>
+                <WorkIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Associate with Job</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleSubmitToClient}>Submit to Client</MenuItem>
             <MenuItem onClick={handleEditCandidate}>Edit Candidate</MenuItem>
@@ -241,13 +263,34 @@ const CandidateDetail = () => {
             onDocumentChange={refreshCandidate}
           />
         )}
-        {activeTab === 2 && (
-          <ActivityTab candidate={candidate} />
-        )}
+        {activeTab === 2 && <ActivityTab candidate={candidate} />}
         {activeTab === 3 && (
           <Typography>Applications content will go here</Typography>
         )}
       </Paper>
+      {/* Job Association Dialog */}
+      <JobAssociationDialog
+        open={jobAssociationOpen}
+        onClose={() => setJobAssociationOpen(false)}
+        candidate={candidate}
+        onSuccess={handleJobAssociationSuccess}
+      />
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
