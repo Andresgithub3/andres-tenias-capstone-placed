@@ -5,7 +5,6 @@ import {
   Button,
   List,
   ListItemButton,
-  ListItemText,
   ListItemIcon,
   Collapse,
   IconButton,
@@ -24,9 +23,11 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   AccessTime as TimeIcon,
+  Star as ImportantIcon,
 } from "@mui/icons-material";
 import { format } from "date-fns";
 import { activityService } from "../../../services/activityService";
+import AddActivityDialog from "./AddActivityDialog";
 
 // Activity type configurations
 const ACTIVITY_TYPES = {
@@ -41,6 +42,7 @@ const ActivityTab = ({ candidate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedActivity, setExpandedActivity] = useState(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
     loadActivities();
@@ -67,7 +69,12 @@ const ActivityTab = ({ candidate }) => {
   };
 
   const handleAddActivity = () => {
-    console.log("Add new activity clicked");
+    setAddDialogOpen(true);
+  };
+
+  const handleActivityAdded = (newActivity) => {
+    // Add new activity to the beginning of the list
+    setActivities((prev) => [newActivity, ...prev]);
   };
 
   const getActivityIcon = (type) => {
@@ -282,6 +289,14 @@ const ActivityTab = ({ candidate }) => {
           })}
         </List>
       )}
+
+      {/* Add Activity Dialog */}
+      <AddActivityDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        candidateId={candidate.id}
+        onActivityAdded={handleActivityAdded}
+      />
     </Box>
   );
 };
