@@ -7,7 +7,6 @@ import {
   Tabs,
   Tab,
   Paper,
-  Chip,
   Menu,
   MenuItem,
   CircularProgress,
@@ -15,7 +14,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  StepConnector,
 } from "@mui/material";
 import {
   ArrowDropDown as ArrowDropDownIcon,
@@ -26,6 +24,7 @@ import {
 import { candidateService } from "../../../services/candidateService";
 import OverviewTab from "./OverviewTab";
 import DocumentsTab from "./DocumentsTab";
+import ActivityTab from "./ActivityTab";
 
 // Pipeline stages
 const PIPELINE_STAGES = [
@@ -243,7 +242,7 @@ const CandidateDetail = () => {
           />
         )}
         {activeTab === 2 && (
-          <Typography>Activity content will go here</Typography>
+          <ActivityTab candidate={candidate} />
         )}
         {activeTab === 3 && (
           <Typography>Applications content will go here</Typography>
