@@ -115,7 +115,7 @@ const DocumentList = ({
               </TableCell>
               <TableCell>
                 <Typography variant="body2" color="text.secondary">
-                  {formatFileSize(doc.file_size)}
+                  {formatFileSize(doc.file_size_bytes)}
                 </Typography>
               </TableCell>
               <TableCell>

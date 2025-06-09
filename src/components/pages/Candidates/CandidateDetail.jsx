@@ -47,6 +47,14 @@ const CandidateDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [actionsAnchor, setActionsAnchor] = useState(null);
 
+  const refreshCandidate = async () => {
+    try {
+      const data = await candidateService.getById(id);
+      setCandidate(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
   // Load candidate data
   useEffect(() => {
     loadCandidate();
@@ -78,15 +86,6 @@ const CandidateDetail = () => {
       );
       return Math.max(max, stageIndex >= 0 ? stageIndex : 0);
     }, 0);
-
-    const refreshCandidate = async () => {
-      try {
-        const data = await candidateService.getById(id);
-        setCandidate(data);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
 
     return maxStageIndex;
   };

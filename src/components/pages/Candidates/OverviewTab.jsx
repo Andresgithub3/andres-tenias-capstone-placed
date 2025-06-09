@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Chip,
-  Divider,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { Box, Typography, Paper, Chip, Card, CardContent } from "@mui/material";
 import {
   Work as WorkIcon,
   School as SchoolIcon,
@@ -36,7 +27,7 @@ const OverviewTab = ({ candidate }) => {
 
       if (resume) {
         setPrimaryResume(resume);
-        const url = await storageService.getDownloadUrl(resume.file_path);
+        const url = await storageService.getViewUrl(resume.file_path);
         setResumeUrl(url);
       }
     } catch (error) {
@@ -51,6 +42,21 @@ const OverviewTab = ({ candidate }) => {
     return Array.isArray(skills)
       ? skills
       : skills.split(",").map((s) => s.trim());
+  };
+
+  const handleResumeDownload = async (documentUrl, fileName) => {
+    try {
+      // Create a temporary link to download the file
+      const link = window.document.createElement("a");
+      link.href = documentUrl;
+      link.download = fileName;
+      link.target = "_blank";
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading resume:", error);
+    }
   };
 
   return (
@@ -231,13 +237,24 @@ const OverviewTab = ({ candidate }) => {
           width: "60%",
           minWidth: "60%",
           height: "100%",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <Paper sx={{ height: "100%", p: 2 }}>
+        <Paper
+          sx={{
+            height: "100%",
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden", // Prevent content from overflowing
+          }}
+        >
           <ResumeViewer
             documentUrl={resumeUrl}
             fileName={primaryResume?.file_name}
             loading={resumeLoading}
+            onDoanload={handleResumeDownload}
           />
         </Paper>
       </Box>
