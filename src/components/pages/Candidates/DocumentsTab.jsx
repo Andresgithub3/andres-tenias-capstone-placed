@@ -6,8 +6,8 @@ import {
   Divider,
   CircularProgress,
 } from "@mui/material";
-import { FileUpload } from "../../documents/FileUpload";
-import { DocumentList } from "../../documents/DocumentList";
+import FileUpload from "../../documents/FileUpload";
+import DocumentList from "../../documents/DocumentList";
 import { storageService } from "../../../services/storageService";
 
 const DocumentsTab = ({ candidate, onDocumentChange }) => {
@@ -40,7 +40,8 @@ const DocumentsTab = ({ candidate, onDocumentChange }) => {
 
   const handleDownload = async (document) => {
     try {
-      const url = await storageService.getDownloadUrl(document.file_path);
+      // Use getDownloadUrl with forceDownload = true for actual downloads
+      const url = await storageService.getDownloadUrl(document.file_path, true);
 
       // Create a temporary link to download the file
       const link = window.document.createElement("a");
