@@ -1,4 +1,4 @@
-import { supabase } from '../api/client/supabase';
+import { supabase } from "../api/client/supabase";
 
 // =============================================================================
 // CONSTANTS
@@ -7,18 +7,18 @@ import { supabase } from '../api/client/supabase';
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB in bytes
 
 const ALLOWED_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'text/plain'
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "text/plain",
 ];
 
 const DOCUMENT_TYPES = {
-  candidate: ['resume', 'portfolio', 'certification', 'other'],
-  company: ['contract', 'agreement', 'other']
+  candidate: ["resume", "portfolio", "certification", "other"],
+  company: ["contract", "agreement", "other"],
 };
 
 // =============================================================================
@@ -27,25 +27,33 @@ const DOCUMENT_TYPES = {
 
 function validateFile(file, entityType, documentType) {
   const errors = [];
-  
+
   // Check file size
   if (file.size > MAX_FILE_SIZE) {
-    errors.push(`File size exceeds 25MB limit. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+    errors.push(
+      `File size exceeds 25MB limit. Current size: ${(
+        file.size /
+        1024 /
+        1024
+      ).toFixed(2)}MB`
+    );
   }
-  
+
   // Check file type
   if (!ALLOWED_TYPES.includes(file.type)) {
-    errors.push(`File type not allowed. Allowed formats: PDF, DOC, DOCX, JPG, PNG, GIF, TXT`);
+    errors.push(
+      `File type not allowed. Allowed formats: PDF, DOC, DOCX, JPG, PNG, GIF, TXT`
+    );
   }
-  
+
   // Check document type is valid for entity
   if (!DOCUMENT_TYPES[entityType]?.includes(documentType)) {
     errors.push(`Invalid document type '${documentType}' for ${entityType}`);
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -53,42 +61,60 @@ function validateFile(file, entityType, documentType) {
 // HELPER FUNCTIONS
 // =============================================================================
 
-async function generateUniqueFileName(userId, entityType, entityId, originalName) {
+async function generateUniqueFileName(
+  userId,
+  entityType,
+  entityId,
+  originalName
+) {
   const basePath = `${userId}/${entityType}s/${entityId}`;
-  const extension = originalName.split('.').pop();
-  const nameWithoutExt = originalName.replace(`.${extension}`, '');
-  
+  const extension = originalName.split(".").pop();
+  const nameWithoutExt = originalName.replace(`.${extension}`, "");
+
   let fileName = originalName;
   let counter = 0;
-  
+
   // Check if file exists and increment counter if needed
   while (true) {
     const { data } = await supabase.storage
-      .from('documents')
+      .from("documents")
       .list(basePath, { search: fileName });
-    
+
     if (!data || data.length === 0) {
       break; // File name is unique
     }
-    
+
     counter++;
     fileName = `${nameWithoutExt}(${counter}).${extension}`;
   }
-  
+
   return fileName;
 }
 
 async function checkIfFirstResume(userId, entityId) {
-  const { data, error } = await supabase
-    .from('documents')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('entity_type', 'candidate')
-    .eq('entity_id', entityId)
-    .eq('document_type', 'resume');
-  
-  if (error) throw error;
-  return data.length === 0;
+  try {
+    console.log("Checking for existing resumes:", { userId, entityId });
+
+    const { data, error } = await supabase
+      .from("documents")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("entity_type", "candidate")
+      .eq("entity_id", entityId)
+      .eq("document_type", "resume");
+
+    console.log("Resume check result:", { data, error });
+
+    if (error) {
+      console.error("Error checking resumes:", error);
+      throw error;
+    }
+
+    return data.length === 0;
+  } catch (error) {
+    console.error("checkIfFirstResume failed:", error);
+    throw error;
+  }
 }
 
 // =============================================================================
@@ -96,7 +122,6 @@ async function checkIfFirstResume(userId, entityId) {
 // =============================================================================
 
 export const storageService = {
-  
   /**
    * Upload a file to storage and create database record
    * @param {File} file - The file to upload
@@ -106,42 +131,59 @@ export const storageService = {
    * @param {function} onProgress - Progress callback (0-100)
    * @returns {Promise<object>} Upload result
    */
-  async uploadFile(file, entityType, entityId, documentType, onProgress = () => {}) {
+  async uploadFile(
+    file,
+    entityType,
+    entityId,
+    documentType,
+    onProgress = () => {}
+  ) {
     try {
       // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error('User not authenticated');
-      
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error("User not authenticated");
+
       // Validate file
       const validation = validateFile(file, entityType, documentType);
       if (!validation.isValid) {
-        throw new Error(validation.errors.join('\n'));
+        throw new Error(validation.errors.join("\n"));
       }
-      
+
       // Generate unique file name
-      const fileName = await generateUniqueFileName(user.id, entityType, entityId, file.name);
+      const fileName = await generateUniqueFileName(
+        user.id,
+        entityType,
+        entityId,
+        file.name
+      );
       const filePath = `${user.id}/${entityType}s/${entityId}/${fileName}`;
-      
+
       // Upload to storage with progress tracking
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .upload(filePath, file, {
           onUploadProgress: (progress) => {
-            const percentage = Math.round((progress.loaded / progress.total) * 100);
+            const percentage = Math.round(
+              (progress.loaded / progress.total) * 100
+            );
             onProgress(percentage);
-          }
+          },
         });
-      
+
       if (uploadError) throw uploadError;
-      
+
       // Check if this is the first resume (for auto-primary logic)
-      const isFirstResume = documentType === 'resume' 
-        ? await checkIfFirstResume(user.id, entityId)
-        : false;
-      
+      const isFirstResume =
+        documentType === "resume"
+          ? await checkIfFirstResume(user.id, entityId)
+          : false;
+
       // Create database record
       const { data: docData, error: docError } = await supabase
-        .from('documents')
+        .from("documents")
         .insert({
           user_id: user.id,
           entity_type: entityType,
@@ -151,26 +193,25 @@ export const storageService = {
           file_path: filePath,
           file_size: file.size,
           mime_type: file.type,
-          is_primary: isFirstResume // Auto-primary for first resume
+          is_primary: isFirstResume, // Auto-primary for first resume
         })
         .select()
         .single();
-      
+
       if (docError) {
         // If database insert fails, clean up the uploaded file
-        await supabase.storage.from('documents').remove([filePath]);
-        throw new Error('Failed to save document record. Please try again.');
+        await supabase.storage.from("documents").remove([filePath]);
+        throw new Error("Failed to save document record. Please try again.");
       }
-      
+
       return {
         success: true,
         document: docData,
         isFirstResume,
-        fileName
+        fileName,
       };
-      
     } catch (error) {
-      throw new Error(error.message || 'Upload failed');
+      throw new Error(error.message || "Upload failed");
     }
   },
 
@@ -182,14 +223,13 @@ export const storageService = {
   async getDownloadUrl(filePath) {
     try {
       const { data, error } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .createSignedUrl(filePath, 3600); // 1 hour expiry
-      
+
       if (error) throw error;
       return data.signedUrl;
-      
     } catch (error) {
-      throw new Error('Failed to generate download URL');
+      throw new Error("Failed to generate download URL");
     }
   },
 
@@ -202,32 +242,31 @@ export const storageService = {
     try {
       // Get document info first
       const { data: doc, error: fetchError } = await supabase
-        .from('documents')
-        .select('file_path')
-        .eq('id', documentId)
+        .from("documents")
+        .select("file_path")
+        .eq("id", documentId)
         .single();
-      
+
       if (fetchError) throw fetchError;
-      
+
       // Delete from storage
       const { error: storageError } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .remove([doc.file_path]);
-      
+
       if (storageError) throw storageError;
-      
+
       // Delete from database
       const { error: dbError } = await supabase
-        .from('documents')
+        .from("documents")
         .delete()
-        .eq('id', documentId);
-      
+        .eq("id", documentId);
+
       if (dbError) throw dbError;
-      
+
       return true;
-      
     } catch (error) {
-      throw new Error('Failed to delete document');
+      throw new Error("Failed to delete document");
     }
   },
 
@@ -240,29 +279,30 @@ export const storageService = {
    */
   async setPrimaryDocument(documentId, entityId, documentType) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       // First, unset all primary documents of this type for this entity
       await supabase
-        .from('documents')
+        .from("documents")
         .update({ is_primary: false })
-        .eq('user_id', user.id)
-        .eq('entity_id', entityId)
-        .eq('document_type', documentType);
-      
+        .eq("user_id", user.id)
+        .eq("entity_id", entityId)
+        .eq("document_type", documentType);
+
       // Then set the selected document as primary
       const { error } = await supabase
-        .from('documents')
+        .from("documents")
         .update({ is_primary: true })
-        .eq('id', documentId);
-      
+        .eq("id", documentId);
+
       if (error) throw error;
-      
+
       return true;
-      
     } catch (error) {
-      throw new Error('Failed to set primary document');
+      throw new Error("Failed to set primary document");
     }
-  }
+  },
 };
