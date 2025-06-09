@@ -6,8 +6,8 @@ import {
   Divider,
   CircularProgress,
 } from "@mui/material";
-import { FileUpload } from "../../documents/FileUpload";
-import { DocumentList } from "../../documents/DocumentList";
+import FileUpload from "../../documents/FileUpload";
+import DocumentList from "../../documents/DocumentList";
 import { storageService } from "../../../services/storageService";
 
 const DocumentsTab = ({ candidate, onDocumentChange }) => {
