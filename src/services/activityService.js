@@ -11,7 +11,7 @@ export const activityService = {
         .select('*')
         .eq('entity_type', entityType)
         .eq('entity_id', entityId)
-        .order('activity_date', { ascending: false });
+        .order('scheduled_date', { ascending: false }); // Use scheduled_date for chronological order
 
       if (error) throw error;
       return data || [];

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
   Button,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   ListItemIcon,
   Collapse,
@@ -13,8 +13,8 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  Divider
-} from '@mui/material';
+  Divider,
+} from "@mui/material";
 import {
   Add as AddIcon,
   Phone as PhoneIcon,
@@ -23,23 +23,23 @@ import {
   Note as NoteIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-  AccessTime as TimeIcon
-} from '@mui/icons-material';
-import { format } from 'date-fns';
-import { activityService } from '../../../services/activityService';
+  AccessTime as TimeIcon,
+} from "@mui/icons-material";
+import { format } from "date-fns";
+import { activityService } from "../../../services/activityService";
 
 // Activity type configurations
 const ACTIVITY_TYPES = {
-  call: { icon: PhoneIcon, label: 'Phone Call', color: 'primary' },
-  email: { icon: EmailIcon, label: 'Email', color: 'info' },
-  meeting: { icon: MeetingIcon, label: 'Meeting', color: 'success' },
-  note: { icon: NoteIcon, label: 'Note', color: 'default' }
+  call: { icon: PhoneIcon, label: "Phone Call", color: "primary" },
+  email: { icon: EmailIcon, label: "Email", color: "info" },
+  meeting: { icon: MeetingIcon, label: "Meeting", color: "success" },
+  note: { icon: NoteIcon, label: "Note", color: "default" },
 };
 
 const ActivityTab = ({ candidate }) => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [expandedActivity, setExpandedActivity] = useState(null);
 
   useEffect(() => {
@@ -49,9 +49,12 @@ const ActivityTab = ({ candidate }) => {
   const loadActivities = async () => {
     try {
       setLoading(true);
-      const data = await activityService.getActivitiesForEntity('candidate', candidate.id);
+      const data = await activityService.getActivitiesForEntity(
+        "candidate",
+        candidate.id
+      );
       setActivities(data);
-      setError('');
+      setError("");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -60,13 +63,11 @@ const ActivityTab = ({ candidate }) => {
   };
 
   const handleActivityClick = (activityId) => {
-    // Toggle expanded activity - close if same one, open if different
-    setExpandedActivity(prev => prev === activityId ? null : activityId);
+    setExpandedActivity((prev) => (prev === activityId ? null : activityId));
   };
 
   const handleAddActivity = () => {
-    // TODO: Open add activity dialog
-    console.log('Add new activity clicked');
+    console.log("Add new activity clicked");
   };
 
   const getActivityIcon = (type) => {
@@ -81,15 +82,15 @@ const ActivityTab = ({ candidate }) => {
 
   const formatActivityDate = (dateString) => {
     try {
-      return format(new Date(dateString), 'MMM d, yyyy \'at\' h:mm a');
+      return format(new Date(dateString), "MMM d, yyyy 'at' h:mm a");
     } catch {
-      return 'Invalid date';
+      return "Invalid date";
     }
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -98,7 +99,14 @@ const ActivityTab = ({ candidate }) => {
   return (
     <Box>
       {/* Header with Add Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Typography variant="h6">
           Activity Timeline ({activities.length})
         </Typography>
@@ -113,14 +121,14 @@ const ActivityTab = ({ candidate }) => {
 
       {/* Error Alert */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
           {error}
         </Alert>
       )}
 
       {/* Activities List */}
       {activities.length === 0 ? (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
+        <Paper sx={{ p: 4, textAlign: "center" }}>
           <Typography color="text.secondary" gutterBottom>
             No activities recorded yet.
           </Typography>
@@ -134,105 +142,140 @@ const ActivityTab = ({ candidate }) => {
           </Button>
         </Paper>
       ) : (
-        <List sx={{ width: '100%' }}>
+        <List sx={{ width: "100%" }}>
           {activities.map((activity, index) => {
             const config = getActivityConfig(activity.activity_type);
             const isExpanded = expandedActivity === activity.id;
-            
+
             return (
               <React.Fragment key={activity.id}>
-                <Paper 
-                  sx={{ 
+                <Paper
+                  sx={{
                     mb: 1,
-                    transition: 'all 0.2s',
-                    '&:hover': { elevation: 2 }
+                    transition: "all 0.2s",
+                    "&:hover": { elevation: 2 },
                   }}
                   elevation={isExpanded ? 2 : 1}
                 >
-                  <ListItem
-                    button
+                  <ListItemButton
                     onClick={() => handleActivityClick(activity.id)}
-                    sx={{ py: 2 }}
+                    sx={{
+                      py: 2,
+                      flexDirection: "column",
+                      alignItems: "stretch",
+                    }}
                   >
-                    <ListItemIcon>
-                      {getActivityIcon(activity.activity_type)}
-                    </ListItemIcon>
-                    
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <ListItemIcon>
+                        {getActivityIcon(activity.activity_type)}
+                      </ListItemIcon>
+
+                      {/* Main Content */}
+                      <Box sx={{ flexGrow: 1 }}>
+                        {/* Title Row */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
                           <Typography variant="subtitle1" component="span">
-                            {activity.subject || 'No subject'}
+                            {activity.subject || "No subject"}
                           </Typography>
-                          <Chip 
-                            label={config.label} 
-                            size="small" 
+                          <Chip
+                            label={config.label}
+                            size="small"
                             color={config.color}
                             variant="outlined"
                           />
-                        </Box>
-                      }
-                      secondary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <TimeIcon fontSize="small" />
-                          <Typography variant="body2" color="text.secondary">
-                            {formatActivityDate(activity.activity_date)}
-                          </Typography>
-                          {activity.follow_up_date && (
-                            <Chip 
-                              label="Follow-up scheduled" 
-                              size="small" 
+                          {activity.is_important && (
+                            <Chip
+                              icon={<ImportantIcon />}
+                              label="Important"
+                              size="small"
                               color="warning"
+                            />
+                          )}
+                          {activity.completed && (
+                            <Chip
+                              label="Completed"
+                              size="small"
+                              color="success"
                               variant="outlined"
                             />
                           )}
                         </Box>
-                      }
-                    />
-                    
-                    <IconButton edge="end">
-                      {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
-                  </ListItem>
-                  
+
+                        {/* Date Row */}
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <TimeIcon fontSize="small" color="action" />
+                          <Typography variant="body2" color="text.secondary">
+                            {formatActivityDate(
+                              activity.scheduled_date || activity.created_at
+                            )}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <IconButton edge="end">
+                        {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </IconButton>
+                    </Box>
+                  </ListItemButton>
+
                   {/* Expandable Content */}
                   <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                     <Box sx={{ px: 3, pb: 3 }}>
                       <Divider sx={{ mb: 2 }} />
-                      
+
                       {/* Activity Details */}
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
                         Details:
                       </Typography>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          mb: 2, 
-                          whiteSpace: 'pre-wrap',
-                          bgcolor: 'action.hover',
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          mb: 2,
+                          whiteSpace: "pre-wrap",
+                          bgcolor: "action.hover",
                           p: 2,
-                          borderRadius: 1
+                          borderRadius: 1,
                         }}
                       >
-                        {activity.details || 'No details provided.'}
+                        {activity.description || "No details provided."}
                       </Typography>
-                      
-                      {/* Follow-up Information */}
-                      {activity.follow_up_date && (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Follow-up scheduled:
-                          </Typography>
-                          <Typography variant="body1">
-                            {formatActivityDate(activity.follow_up_date)}
-                          </Typography>
-                        </Box>
-                      )}
+
+                      {/* Created Date */}
+                      <Box sx={{ mt: 2 }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Created:
+                        </Typography>
+                        <Typography variant="body2">
+                          {formatActivityDate(activity.created_at)}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Collapse>
                 </Paper>
-                
-                {/* Add some spacing between items except for the last one */}
+
                 {index < activities.length - 1 && <Box sx={{ mb: 1 }} />}
               </React.Fragment>
             );
