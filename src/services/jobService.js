@@ -5,12 +5,7 @@ export const jobService = {
     try {
       let query = supabase
         .from("jobs")
-        .select(
-          `
-                    *,
-                    company:companies(id, name)
-                `
-        )
+        .select(`*, company:companies(id, name)`)
         .order("created_at", { ascending: false });
 
       // Add filters if needed
@@ -107,6 +102,20 @@ export const jobService = {
       return data;
     } catch (error) {
       throw new Error("Failed to fetch active jobs: " + error.message);
+    }
+  },
+
+  async getCompaniesForDropdown() {
+    try {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .order("name");
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw new Error("Failed to fetch companies: " + error.message);
     }
   },
 };
