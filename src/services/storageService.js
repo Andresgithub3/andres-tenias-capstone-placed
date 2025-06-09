@@ -139,6 +139,13 @@ export const storageService = {
     onProgress = () => {}
   ) {
     try {
+      console.log("Starting upload:", {
+        file: file.name,
+        entityType,
+        entityId,
+        documentType,
+      });
+
       // Get current user
       const {
         data: { user },
@@ -146,11 +153,15 @@ export const storageService = {
       } = await supabase.auth.getUser();
       if (userError || !user) throw new Error("User not authenticated");
 
+      console.log("User authenticated:", user.id);
+
       // Validate file
       const validation = validateFile(file, entityType, documentType);
       if (!validation.isValid) {
         throw new Error(validation.errors.join("\n"));
       }
+
+      console.log("File validation passed");
 
       // Generate unique file name
       const fileName = await generateUniqueFileName(
@@ -160,6 +171,8 @@ export const storageService = {
         file.name
       );
       const filePath = `${user.id}/${entityType}s/${entityId}/${fileName}`;
+
+      console.log("Generated file path for upload:", filePath);
 
       // Upload to storage with progress tracking
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -173,6 +186,8 @@ export const storageService = {
           },
         });
 
+      console.log("Storage upload result:", { uploadData, uploadError });
+
       if (uploadError) throw uploadError;
 
       // Check if this is the first resume (for auto-primary logic)
@@ -181,27 +196,37 @@ export const storageService = {
           ? await checkIfFirstResume(user.id, entityId)
           : false;
 
+      console.log("Is first resume:", isFirstResume);
+
       // Create database record
+      const documentRecord = {
+        user_id: user.id,
+        entity_type: entityType,
+        entity_id: entityId,
+        document_type: documentType,
+        file_name: fileName,
+        file_path: filePath,
+        file_size_bytes: file.size,
+        mime_type: file.type,
+        is_primary: isFirstResume, // Auto-primary for first resume
+      };
+
+      console.log("Creating document record:", documentRecord);
+
       const { data: docData, error: docError } = await supabase
         .from("documents")
-        .insert({
-          user_id: user.id,
-          entity_type: entityType,
-          entity_id: entityId,
-          document_type: documentType,
-          file_name: fileName,
-          file_path: filePath,
-          file_size: file.size,
-          mime_type: file.type,
-          is_primary: isFirstResume, // Auto-primary for first resume
-        })
+        .insert(documentRecord)
         .select()
         .single();
+
+      console.log("Database insert result:", { docData, docError });
 
       if (docError) {
         // If database insert fails, clean up the uploaded file
         await supabase.storage.from("documents").remove([filePath]);
-        throw new Error("Failed to save document record. Please try again.");
+        throw new Error(
+          "Failed to save document record: " + JSON.stringify(docError)
+        );
       }
 
       return {
@@ -211,6 +236,7 @@ export const storageService = {
         fileName,
       };
     } catch (error) {
+      console.error("Upload failed:", error);
       throw new Error(error.message || "Upload failed");
     }
   },
@@ -218,18 +244,42 @@ export const storageService = {
   /**
    * Get download URL for a document
    * @param {string} filePath - Path to the file in storage
+   * @param {boolean} forceDownload - Whether to force download or allow inline viewing
    * @returns {Promise<string>} Signed download URL
    */
-  async getDownloadUrl(filePath) {
+  async getDownloadUrl(filePath, forceDownload = false) {
     try {
+      const options = {
+        download: forceDownload, // This controls download vs inline viewing
+      };
+
       const { data, error } = await supabase.storage
         .from("documents")
-        .createSignedUrl(filePath, 3600); // 1 hour expiry
+        .createSignedUrl(filePath, 3600, options); // 1 hour expiry
 
       if (error) throw error;
       return data.signedUrl;
     } catch (error) {
       throw new Error("Failed to generate download URL");
+    }
+  },
+
+  /**
+   * Get URL for viewing (not downloading) a document
+   * @param {string} filePath - Path to the file in storage
+   * @returns {Promise<string>} Signed URL for viewing
+   */
+  async getViewUrl(filePath) {
+    try {
+      // trying NOT to force download
+      const { data, error } = await supabase.storage
+        .from("documents")
+        .createSignedUrl(filePath, 3600);
+
+      if (error) throw error;
+      return data.signedUrl;
+    } catch (error) {
+      throw new Error("Failed to generate view URL");
     }
   },
 
