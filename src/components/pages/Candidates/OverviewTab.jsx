@@ -23,11 +23,16 @@ const OverviewTab = ({ candidate }) => {
   const loadPrimaryResume = async () => {
     try {
       setResumeLoading(true);
-      const resume = await candidateService.getPrimaryResume(candidate.id);
 
-      if (resume) {
-        setPrimaryResume(resume);
-        const url = await storageService.getViewUrl(resume.file_path);
+      // First, let's try getting documents from the candidate data instead
+      const documents = candidate.documents || [];
+      const primaryResume = documents.find(
+        (doc) => doc.document_type === "resume" && doc.is_primary === true
+      );
+
+      if (primaryResume) {
+        setPrimaryResume(primaryResume);
+        const url = await storageService.getViewUrl(primaryResume.file_path);
         setResumeUrl(url);
       }
     } catch (error) {

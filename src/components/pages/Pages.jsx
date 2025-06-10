@@ -1,6 +1,5 @@
 // Jobs.jsx
 import { Typography, Box, Card, CardContent, Button } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import { Work as WorkIcon } from '@mui/icons-material';
 
 export const Jobs = () => (

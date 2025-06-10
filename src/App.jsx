@@ -16,9 +16,14 @@ import AppLayout from "./components/layout/AppLayout";
 
 // Page Components
 import Dashboard from "./components/dashboard/Dashboard";
-import CandidatesList from './components/pages/Candidates/CandidatesList';
+import CandidatesList from "./components/pages/Candidates/CandidatesList";
 import CandidateDetail from "./components/pages/Candidates/CandidateDetail";
-// import JobsList from './components/pages/Jobs/JobsList';
+import JobsList from "./components/pages/Jobs/JobsList";
+import JobForm from "./components/pages/Jobs/JobForm";
+import JobDetail from "./components/pages/Jobs/JobDetail";
+import CompaniesList from "./components/pages/Companies/CompaniesList";
+import CompanyForm from "./components/pages/Companies/CompanyForm";
+import CompanyDetail from "./components/pages/Companies/CompanyDetails";
 
 // Loading Component
 const LoadingScreen = () => (
@@ -62,53 +67,6 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
-  // // State to hold the Supabase connection test status
-  // const [supabaseConnectionStatus, setSupabaseConnectionStatus] = useState(
-  //   "Checking Supabase connection..."
-  // );
-
-  // // useEffect hook to run the Supabase connection test once on component mount
-  // useEffect(() => {
-  //   const testSupabaseConnection = async () => {
-  //     try {
-  //       // Attempt to get the current session. This is a common way to test
-  //       // if the Supabase client can reach the backend.
-  //       const {
-  //         data: { session },
-  //         error,
-  //       } = await supabase.auth.getSession();
-
-  //       if (error) {
-  //         // If there's an error, it means the connection failed or keys are wrong
-  //         setSupabaseConnectionStatus(
-  //           `Supabase Connection Error: ${error.message}`
-  //         );
-  //         console.error("Supabase connection test failed:", error);
-  //       } else if (session) {
-  //         // If a session exists, the connection is good and a user is logged in
-  //         setSupabaseConnectionStatus(
-  //           `Supabase Connected! User: ${session.user.email}`
-  //         );
-  //         console.log("Supabase session:", session);
-  //       } else {
-  //         // If no error and no session, the connection is good but no user is logged in
-  //         setSupabaseConnectionStatus(
-  //           "Supabase Connected! No active session (user not logged in)."
-  //         );
-  //         console.log("Supabase connection successful, no active session.");
-  //       }
-  //     } catch (err) {
-  //       // Catch any errors during the initial creation or call to supabase
-  //       setSupabaseConnectionStatus(
-  //         `Supabase Initialization Error: ${err.message}`
-  //       );
-  //       console.error("Supabase initialization failed:", err);
-  //     }
-  //   };
-
-  //   testSupabaseConnection();
-  // }, []); // The empty dependency array ensures this runs only once when App mounts
-
   return (
     <BrowserRouter>
       <Routes>
@@ -151,13 +109,15 @@ function App() {
           {/* Nested routes that will render inside AppLayout */}
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
-          {/* <Route path="jobs" element={<Jobs />} /> */}
-          {/* <Route path="candidates" element={<Candidates />} /> */}
           <Route path="candidates" element={<CandidatesList />} />
+          <Route path="jobs" element={<JobsList />} />
+          <Route path="jobs/new" element={<JobForm />} />
+          <Route path="jobs/:id" element={<JobDetail />} />
           <Route path="candidates/:id" element={<CandidateDetail />} />
-          {/* <Route path="interviews" element={<Interviews />} /> */}
-          {/* <Route path="companies" element={<Companies />} /> */}
-          {/* <Route path="analytics" element={<Analytics />} /> */}
+          <Route path="companies" element={<CompaniesList />} />
+          <Route path="companies/new" element={<CompanyForm />} />
+          <Route path="companies/:id/edit" element={<CompanyForm />} />
+          <Route path="companies/:id" element={<CompanyDetail />} />
         </Route>
 
         {/* Catch all route */}
