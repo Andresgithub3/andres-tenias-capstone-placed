@@ -141,29 +141,4 @@ export const candidateService = {
       throw new Error("Failed to delete candidate: " + error.message);
     }
   },
-
-  // /**
-  //  * Get primary resume for a candidate
-  //  */
-  // async getPrimaryResume(candidateId) {
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from("documents")
-  //       .select("*")
-  //       .eq("entity_id", candidateId)
-  //       .eq("entity_type", "candidate")
-  //       .eq("document_type", "resume")
-  //       .eq("is_primary", true)
-  //       .single();
-
-  //     if (error && error.code !== "PGRST116") {
-  //       // PGRST116 = no rows returned
-  //       throw error;
-  //     }
-
-  //     return data || null;
-  //   } catch (error) {
-  //     throw new Error("Failed to fetch primary resume: " + error.message);
-  //   }
-  // },
 };
