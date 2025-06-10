@@ -18,7 +18,7 @@ const ALLOWED_TYPES = [
 
 const DOCUMENT_TYPES = {
   candidate: ["resume", "portfolio", "certification", "other"],
-  company: ["contract", "agreement", "other"],
+  company: ["contract", "agreement", "proposal", "invoice", "presentation", "other"],
 };
 
 // =============================================================================
