@@ -79,4 +79,29 @@ export const applicationService = {
       throw new Error("Failed to update application status: " + error.message);
     }
   },
+  async getForJob(jobId) {
+    try {
+      const { data, error } = await supabase
+        .from("applications")
+        .select(
+          `
+          *,
+          candidate:candidates(
+            id,
+            first_name,
+            last_name,
+            email,
+            phone
+          )
+        `
+        )
+        .eq("job_id", jobId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw new Error("Failed to fetch job applications: " + error.message);
+    }
+  },
 };

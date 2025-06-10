@@ -1,4 +1,4 @@
-import { supabase } from '../api/client/supabase';
+import { supabase } from "../api/client/supabase";
 
 export const activityService = {
   /**
@@ -7,16 +7,16 @@ export const activityService = {
   async getActivitiesForEntity(entityType, entityId) {
     try {
       const { data, error } = await supabase
-        .from('activities')
-        .select('*')
-        .eq('entity_type', entityType)
-        .eq('entity_id', entityId)
-        .order('scheduled_date', { ascending: false }); // Use scheduled_date for chronological order
+        .from("activities")
+        .select("*")
+        .eq("entity_type", entityType)
+        .eq("entity_id", entityId)
+        .order("scheduled_date", { ascending: false }); // Use scheduled_date for chronological order
 
       if (error) throw error;
       return data || [];
     } catch (error) {
-      throw new Error('Failed to fetch activities: ' + error.message);
+      throw new Error("Failed to fetch activities: " + error.message);
     }
   },
 
@@ -25,14 +25,16 @@ export const activityService = {
    */
   async createActivity(activityData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
-        .from('activities')
+        .from("activities")
         .insert({
           ...activityData,
-          user_id: user.id
+          user_id: user.id,
         })
         .select()
         .single();
@@ -40,7 +42,7 @@ export const activityService = {
       if (error) throw error;
       return data;
     } catch (error) {
-      throw new Error('Failed to create activity: ' + error.message);
+      throw new Error("Failed to create activity: " + error.message);
     }
   },
 
@@ -50,16 +52,16 @@ export const activityService = {
   async updateActivity(id, activityData) {
     try {
       const { data, error } = await supabase
-        .from('activities')
+        .from("activities")
         .update(activityData)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      throw new Error('Failed to update activity: ' + error.message);
+      throw new Error("Failed to update activity: " + error.message);
     }
   },
 
@@ -68,15 +70,28 @@ export const activityService = {
    */
   async deleteActivity(id) {
     try {
-      const { error } = await supabase
-        .from('activities')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("activities").delete().eq("id", id);
 
       if (error) throw error;
       return true;
     } catch (error) {
-      throw new Error('Failed to delete activity: ' + error.message);
+      throw new Error("Failed to delete activity: " + error.message);
     }
-  }
+  },
+
+  async getByEntity(entityType, entityId) {
+    try {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("entity_type", entityType)
+        .eq("entity_id", entityId)
+        .order("scheduled_date", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      throw new Error("Failed to fetch activities: " + error.message);
+    }
+  },
 };

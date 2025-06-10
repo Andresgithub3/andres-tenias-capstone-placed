@@ -16,7 +16,7 @@ import {
   StepLabel,
   Snackbar,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from "@mui/material";
 import {
   ArrowDropDown as ArrowDropDownIcon,
@@ -30,6 +30,7 @@ import OverviewTab from "./OverviewTab";
 import DocumentsTab from "./DocumentsTab";
 import ActivityTab from "./ActivityTab";
 import JobAssociationDialog from "./JobAssociationDialog";
+import ApplicationsTab from "./ApplicationsTab";
 
 // Pipeline stages
 const PIPELINE_STAGES = [
@@ -265,7 +266,10 @@ const CandidateDetail = () => {
         )}
         {activeTab === 2 && <ActivityTab candidate={candidate} />}
         {activeTab === 3 && (
-          <Typography>Applications content will go here</Typography>
+          <ApplicationsTab
+            candidate={candidate}
+            onAssociateJob={() => setJobAssociationOpen(true)}
+          />
         )}
       </Paper>
       {/* Job Association Dialog */}

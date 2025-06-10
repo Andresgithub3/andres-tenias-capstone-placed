@@ -29,7 +29,7 @@ export const jobService = {
         .select(
           `
                     *,
-                    company:companies(id, name, location_city, location_state)
+                    company:companies(id, name, city, state)
                 `
         )
         .eq("id", id)

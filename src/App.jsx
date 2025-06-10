@@ -20,7 +20,7 @@ import CandidatesList from "./components/pages/Candidates/CandidatesList";
 import CandidateDetail from "./components/pages/Candidates/CandidateDetail";
 import JobsList from './components/pages/Jobs/JobsList';
 import JobForm from './components/pages/Jobs/JobForm';
-import { JobDetail } from './components/pages/Jobs/JobDetail';
+import JobDetail from './components/pages/Jobs/JobDetail';
 
 // Loading Component
 const LoadingScreen = () => (
@@ -160,9 +160,6 @@ function App() {
           <Route path="jobs/new" element={<JobForm />} />
           <Route path="jobs/:id" element={<JobDetail />} />
           <Route path="candidates/:id" element={<CandidateDetail />} />
-          {/* <Route path="interviews" element={<Interviews />} /> */}
-          {/* <Route path="companies" element={<Companies />} /> */}
-          {/* <Route path="analytics" element={<Analytics />} /> */}
         </Route>
 
         {/* Catch all route */}
