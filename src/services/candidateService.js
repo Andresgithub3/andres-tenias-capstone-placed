@@ -1,4 +1,4 @@
-import { supabase } from '../api/client/supabase';
+import { supabase } from "../api/client/supabase";
 
 export const candidateService = {
   /**
@@ -7,13 +7,15 @@ export const candidateService = {
   async getAll(filters = {}) {
     try {
       let query = supabase
-        .from('candidates')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("candidates")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       // Add filters if needed
       if (filters.search) {
-        query = query.or(`first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+        query = query.or(
+          `first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`
+        );
       }
 
       const { data, error } = await query;
@@ -21,7 +23,7 @@ export const candidateService = {
 
       return data;
     } catch (error) {
-      throw new Error('Failed to fetch candidates: ' + error.message);
+      throw new Error("Failed to fetch candidates: " + error.message);
     }
   },
 
@@ -32,27 +34,28 @@ export const candidateService = {
     try {
       // First, get the candidate basic info
       const { data: candidate, error: candidateError } = await supabase
-        .from('candidates')
-        .select('*')
-        .eq('id', id)
+        .from("candidates")
+        .select("*")
+        .eq("id", id)
         .single();
 
       if (candidateError) throw candidateError;
 
       // Then get documents separately
       const { data: documents, error: documentsError } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('entity_type', 'candidate')
-        .eq('entity_id', id)
-        .order('created_at', { ascending: false });
+        .from("documents")
+        .select("*")
+        .eq("entity_type", "candidate")
+        .eq("entity_id", id)
+        .order("created_at", { ascending: false });
 
       if (documentsError) throw documentsError;
 
       // Get applications with job info
       const { data: applications, error: applicationsError } = await supabase
-        .from('applications')
-        .select(`
+        .from("applications")
+        .select(
+          `
           *,
           job:jobs(
             id,
@@ -62,9 +65,10 @@ export const candidateService = {
               name
             )
           )
-        `)
-        .eq('candidate_id', id)
-        .order('created_at', { ascending: false });
+        `
+        )
+        .eq("candidate_id", id)
+        .order("created_at", { ascending: false });
 
       if (applicationsError) throw applicationsError;
 
@@ -72,10 +76,10 @@ export const candidateService = {
       return {
         ...candidate,
         documents: documents || [],
-        applications: applications || []
+        applications: applications || [],
       };
     } catch (error) {
-      throw new Error('Failed to fetch candidate: ' + error.message);
+      throw new Error("Failed to fetch candidate: " + error.message);
     }
   },
 
@@ -84,14 +88,16 @@ export const candidateService = {
    */
   async create(candidateData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
-        .from('candidates')
+        .from("candidates")
         .insert({
           ...candidateData,
-          user_id: user.id
+          user_id: user.id,
         })
         .select()
         .single();
@@ -99,7 +105,7 @@ export const candidateService = {
       if (error) throw error;
       return data;
     } catch (error) {
-      throw new Error('Failed to create candidate: ' + error.message);
+      throw new Error("Failed to create candidate: " + error.message);
     }
   },
 
@@ -109,15 +115,16 @@ export const candidateService = {
   async update(id, candidateData) {
     try {
       const { data, error } = await supabase
+        .from("candidates")
         .update(candidateData)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      throw new Error('Failed to update candidate: ' + error.message);
+      throw new Error("Failed to update candidate: " + error.message);
     }
   },
 
@@ -126,39 +133,37 @@ export const candidateService = {
    */
   async delete(id) {
     try {
-      const { error } = await supabase
-        .from('candidates')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("candidates").delete().eq("id", id);
 
       if (error) throw error;
       return true;
     } catch (error) {
-      throw new Error('Failed to delete candidate: ' + error.message);
+      throw new Error("Failed to delete candidate: " + error.message);
     }
   },
 
-  /**
-   * Get primary resume for a candidate
-   */
-  async getPrimaryResume(candidateId) {
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('entity_id', candidateId)
-        .eq('entity_type', 'candidate')
-        .eq('document_type', 'resume')
-        .eq('is_primary', true)
-        .single();
+  // /**
+  //  * Get primary resume for a candidate
+  //  */
+  // async getPrimaryResume(candidateId) {
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("documents")
+  //       .select("*")
+  //       .eq("entity_id", candidateId)
+  //       .eq("entity_type", "candidate")
+  //       .eq("document_type", "resume")
+  //       .eq("is_primary", true)
+  //       .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw error;
-      }
+  //     if (error && error.code !== "PGRST116") {
+  //       // PGRST116 = no rows returned
+  //       throw error;
+  //     }
 
-      return data || null;
-    } catch (error) {
-      throw new Error('Failed to fetch primary resume: ' + error.message);
-    }
-  }
+  //     return data || null;
+  //   } catch (error) {
+  //     throw new Error("Failed to fetch primary resume: " + error.message);
+  //   }
+  // },
 };
