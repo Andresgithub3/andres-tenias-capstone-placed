@@ -18,6 +18,7 @@ import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./components/dashboard/Dashboard";
 import CandidatesList from "./components/pages/Candidates/CandidatesList";
 import CandidateDetail from "./components/pages/Candidates/CandidateDetail";
+import CandidateForm from "./components/pages/Candidates/CandidateForm";
 import JobsList from "./components/pages/Jobs/JobsList";
 import JobForm from "./components/pages/Jobs/JobForm";
 import JobDetail from "./components/pages/Jobs/JobDetail";
@@ -105,15 +106,17 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="test-db" element={<DatabaseTester />} />
+          {/* <Route path="test-db" element={<DatabaseTester />} /> */}
           {/* Nested routes that will render inside AppLayout */}
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="candidates" element={<CandidatesList />} />
+          <Route path="candidates/new" element={<CandidateForm />} />
+          <Route path="candidates/:id" element={<CandidateDetail />} />
+          <Route path="candidates/:id/edit" element={<CandidateForm />} />
           <Route path="jobs" element={<JobsList />} />
           <Route path="jobs/new" element={<JobForm />} />
           <Route path="jobs/:id" element={<JobDetail />} />
-          <Route path="candidates/:id" element={<CandidateDetail />} />
           <Route path="companies" element={<CompaniesList />} />
           <Route path="companies/new" element={<CompanyForm />} />
           <Route path="companies/:id/edit" element={<CompanyForm />} />

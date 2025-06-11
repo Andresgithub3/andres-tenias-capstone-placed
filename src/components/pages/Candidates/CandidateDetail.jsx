@@ -221,6 +221,13 @@ const CandidateDetail = () => {
             </Box>
           )}
 
+          {candidate.linkedin_url && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <PhoneIcon fontSize="small" color="action" />
+              <Typography variant="body1">{candidate.linkedin_url}</Typography>
+            </Box>
+          )}
+
           {candidate.location && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <LocationIcon fontSize="small" color="action" />
