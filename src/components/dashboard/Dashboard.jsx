@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -12,6 +12,8 @@ import {
   ListItemIcon,
   Chip,
   Button,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {
   TrendingUp,
@@ -23,114 +25,18 @@ import {
   Schedule,
   Person,
 } from "@mui/icons-material";
+import { dashboardService } from "../../services/dashboardService";
+import { useNavigate } from "react-router-dom";
 
-// Mock data - will be replaced with real data later
-const dashboardStats = [
-  {
-    title: 'Total Open Jobs',
-    value: '24',
-    change: '+12%',
-    changeType: 'positive',
-    icon: <Work />,
-    color: 'primary',
-  },
-  {
-    title: 'Active Contractors',
-    value: '156',
-    change: '+8%',
-    changeType: 'positive',
-    icon: <People />,
-    color: 'secondary',
-  },
-  {
-    title: 'Interviews This Week',
-    value: '18',
-    change: '+5%',
-    changeType: 'positive',
-    icon: <CalendarToday />,
-    color: 'success',
-  },
-  {
-    title: 'Permanent Placements This Month',
-    value: '7',
-    change: '+40%',
-    changeType: 'positive',
-    icon: <TrendingUp />,
-    color: 'warning',
-  },
-];
-
-const recentActivities = [
-  {
-    id: 1,
-    type: 'interview',
-    title: 'Interview scheduled with Sarah Johnson',
-    subtitle: 'Senior Frontend Developer position',
-    time: '2 hours ago',
-    icon: <CalendarToday />,
-  },
-  {
-    id: 2,
-    type: 'application',
-    title: 'New application received',
-    subtitle: 'Backend Developer - TechCorp',
-    time: '4 hours ago',
-    icon: <Assignment />,
-  },
-  {
-    id: 3,
-    type: 'placement',
-    title: 'Candidate placed successfully',
-    subtitle: 'John Doe - Full Stack Developer',
-    time: '1 day ago',
-    icon: <CheckCircle />,
-  },
-  {
-    id: 4,
-    type: 'job',
-    title: 'New job posting created',
-    subtitle: 'UX Designer - StartupXYZ',
-    time: '2 days ago',
-    icon: <Work />,
-  },
-];
-
-const upcomingInterviews = [
-  {
-    id: 1,
-    candidate: 'Alice Cooper',
-    position: 'Product Manager',
-    company: 'TechStart Inc.',
-    time: '10:00 AM',
-    type: 'Final Round',
-  },
-  {
-    id: 2,
-    candidate: 'Bob Williams',
-    position: 'Data Scientist',
-    company: 'DataCorp',
-    time: '2:00 PM',
-    type: 'Technical Interview',
-  },
-  {
-    id: 3,
-    candidate: 'Carol Davis',
-    position: 'UI/UX Designer',
-    company: 'DesignHub',
-    time: '4:30 PM',
-    type: 'Portfolio Review',
-  },
-];
-
-const StatCard = ({ stat }) => (
-  <Card sx={{ height: '100%' }}>
+const StatCard = ({ stat, loading }) => (
+  <Card sx={{ height: "100%" }}>
     <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             width: 48,
             height: 48,
             borderRadius: 2,
@@ -143,24 +49,126 @@ const StatCard = ({ stat }) => (
         </Box>
         <Box>
           <Typography variant="h4" component="div" fontWeight="bold">
-            {stat.value}
+            {loading ? <CircularProgress size={24} /> : stat.value}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {stat.title}
           </Typography>
         </Box>
       </Box>
-      <Chip
-        label={stat.change}
-        size="small"
-        color={stat.changeType === 'positive' ? 'success' : 'error'}
-        variant="outlined"
-      />
     </CardContent>
   </Card>
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalOpenJobs: 0,
+    activeContractors: 0,
+    interviewsThisWeek: 0,
+    permanentPlacementsThisMonth: 0,
+  });
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [todaysInterviews, setTodaysInterviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Load all dashboard data in parallel
+      const [statsData, activitiesData, interviewsData] = await Promise.all([
+        dashboardService.getDashboardStats(),
+        dashboardService.getRecentActivities(),
+        dashboardService.getTodaysInterviews(),
+      ]);
+
+      setStats(statsData);
+      setRecentActivities(activitiesData);
+      setTodaysInterviews(interviewsData);
+    } catch (err) {
+      setError(err.message);
+      console.error("Dashboard loading error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create dashboard stats array with real data
+  const dashboardStats = [
+    {
+      title: "Total Open Jobs",
+      value: stats.totalOpenJobs.toString(),
+      icon: <Work />,
+      color: "primary",
+    },
+    {
+      title: "Active Contractors",
+      value: stats.activeContractors.toString(),
+      icon: <People />,
+      color: "secondary",
+    },
+    {
+      title: "Interviews This Week",
+      value: stats.interviewsThisWeek.toString(),
+      icon: <CalendarToday />,
+      color: "success",
+    },
+    {
+      title: "Permanent Placements This Month",
+      value: stats.permanentPlacementsThisMonth.toString(),
+      icon: <TrendingUp />,
+      color: "warning",
+    },
+  ];
+
+  // Map activity types to icons and descriptions
+  const getActivityIcon = (activityType) => {
+    switch (activityType) {
+      case "interview":
+      case "call":
+        return <CalendarToday />;
+      case "email":
+      case "note":
+        return <Assignment />;
+      case "meeting":
+        return <People />;
+      default:
+        return <Assignment />;
+    }
+  };
+
+  const formatActivityDescription = (activity) => {
+    const entityMap = {
+      candidate: "Candidate",
+      job: "Job",
+      company: "Company",
+    };
+
+    return {
+      title: `${
+        activity.activity_type.charAt(0).toUpperCase() +
+        activity.activity_type.slice(1)
+      } - ${entityMap[activity.entity_type] || "Unknown"}`,
+      subtitle: activity.description || `${activity.activity_type} activity`,
+      time: new Date(activity.created_at).toLocaleDateString(),
+    };
+  };
+
+  const formatTime = (dateString) => {
+    return new Date(dateString).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   return (
     <Box>
       {/* Welcome Section */}
@@ -173,11 +181,18 @@ const Dashboard = () => {
         </Typography>
       </Box>
 
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
+
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {dashboardStats.map((stat, index) => (
           <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-            <StatCard stat={stat} />
+            <StatCard stat={stat} loading={loading} />
           </Grid>
         ))}
       </Grid>
@@ -187,118 +202,193 @@ const Dashboard = () => {
         {/* Recent Activities */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Typography variant="h6">Recent Activities</Typography>
               <Button variant="outlined" size="small">
                 View All
               </Button>
             </Box>
-            <List>
-              {recentActivities.map((activity, index) => (
-                <ListItem
-                  key={activity.id}
-                  divider={index < recentActivities.length - 1}
-                  sx={{ px: 0 }}
-                >
-                  <ListItemIcon>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        backgroundColor: 'primary.light',
-                        color: 'primary.main',
-                      }}
+
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : recentActivities.length === 0 ? (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textAlign: "center", py: 3 }}
+              >
+                No recent activities found
+              </Typography>
+            ) : (
+              <List>
+                {recentActivities.map((activity, index) => {
+                  const formattedActivity = formatActivityDescription(activity);
+                  return (
+                    <ListItem
+                      key={activity.id}
+                      divider={index < recentActivities.length - 1}
+                      sx={{ px: 0 }}
                     >
-                      {activity.icon}
-                    </Box>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={activity.title}
-                    secondary={
-                      <Box component="span" sx={{ display: 'block' }}>
-                        <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block' }}>
-                          {activity.subtitle}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
-                          {activity.time}
-                        </Typography>
-                      </Box>
-                    }
-                    secondaryTypographyProps={{ component: 'div' }}
-                  />
-                </ListItem>
-              ))}
-            </List>
+                      <ListItemIcon>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: "primary.light",
+                            color: "primary.main",
+                          }}
+                        >
+                          {getActivityIcon(activity.activity_type)}
+                        </Box>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={formattedActivity.title}
+                        secondary={
+                          <Box component="span" sx={{ display: "block" }}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              component="span"
+                              sx={{ display: "block" }}
+                            >
+                              {formattedActivity.subtitle}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              component="span"
+                              sx={{ display: "block" }}
+                            >
+                              {formattedActivity.time}
+                            </Typography>
+                          </Box>
+                        }
+                        secondaryTypographyProps={{ component: "div" }}
+                      />
+                    </ListItem>
+                  );
+                })}
+              </List>
+            )}
           </Paper>
         </Grid>
 
-        {/* Upcoming Interviews */}
+        {/* Today's Interviews */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Typography variant="h6">Today's Interviews</Typography>
               <Button variant="outlined" size="small">
                 Calendar
               </Button>
             </Box>
-            <List>
-              {upcomingInterviews.map((interview, index) => (
-                <ListItem
-                  key={interview.id}
-                  divider={index < upcomingInterviews.length - 1}
-                  sx={{ px: 0 }}
-                >
-                  <ListItemIcon>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        backgroundColor: 'secondary.light',
-                        color: 'secondary.main',
-                      }}
-                    >
-                      <Person />
-                    </Box>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Box component="span" sx={{ display: 'block' }}>
-                        <Typography variant="body2" fontWeight="medium" component="span" sx={{ display: 'block' }}>
-                          {interview.candidate}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
-                          {interview.position} • {interview.company}
-                        </Typography>
+
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : todaysInterviews.length === 0 ? (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textAlign: "center", py: 3 }}
+              >
+                No interviews scheduled for today
+              </Typography>
+            ) : (
+              <List>
+                {todaysInterviews.map((interview, index) => (
+                  <ListItem
+                    key={interview.id}
+                    divider={index < todaysInterviews.length - 1}
+                    sx={{ px: 0 }}
+                  >
+                    <ListItemIcon>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 40,
+                          height: 40,
+                          borderRadius: "50%",
+                          backgroundColor: "secondary.light",
+                          color: "secondary.main",
+                        }}
+                      >
+                        <Person />
                       </Box>
-                    }
-                    secondary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }} component="span">
-                        <Schedule fontSize="small" />
-                        <Typography variant="caption" component="span">
-                          {interview.time}
-                        </Typography>
-                        <Chip
-                          label={interview.type}
-                          size="small"
-                          variant="outlined"
-                          sx={{ ml: 'auto' }}
-                        />
-                      </Box>
-                    }
-                    primaryTypographyProps={{ component: 'div' }}
-                    secondaryTypographyProps={{ component: 'div' }}
-                  />
-                </ListItem>
-              ))}
-            </List>
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Box component="span" sx={{ display: "block" }}>
+                          <Typography
+                            variant="body2"
+                            fontWeight="medium"
+                            component="span"
+                            sx={{ display: "block" }}
+                          >
+                            {interview.candidate_name}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            component="span"
+                            sx={{ display: "block" }}
+                          >
+                            {interview.job_title} • {interview.company_name}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            mt: 0.5,
+                          }}
+                          component="span"
+                        >
+                          <Schedule fontSize="small" />
+                          <Typography variant="caption" component="span">
+                            {formatTime(interview.scheduled_date)}
+                          </Typography>
+                          <Chip
+                            label={interview.interview_type || "Interview"}
+                            size="small"
+                            variant="outlined"
+                            sx={{ ml: "auto" }}
+                          />
+                        </Box>
+                      }
+                      primaryTypographyProps={{ component: "div" }}
+                      secondaryTypographyProps={{ component: "div" }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Paper>
         </Grid>
 
@@ -315,6 +405,7 @@ const Dashboard = () => {
                   fullWidth
                   startIcon={<Work />}
                   sx={{ py: 2 }}
+                  onClick={() => navigate("/jobs/new")}
                 >
                   Create New Job
                 </Button>
@@ -325,6 +416,7 @@ const Dashboard = () => {
                   fullWidth
                   startIcon={<People />}
                   sx={{ py: 2 }}
+                  onClick={() => navigate("/candidates/new")}
                 >
                   Add Candidate
                 </Button>
@@ -335,6 +427,7 @@ const Dashboard = () => {
                   fullWidth
                   startIcon={<CalendarToday />}
                   sx={{ py: 2 }}
+                  disabled
                 >
                   Schedule Interview
                 </Button>
@@ -345,6 +438,7 @@ const Dashboard = () => {
                   fullWidth
                   startIcon={<TrendingUp />}
                   sx={{ py: 2 }}
+                  disabled
                 >
                   View Reports
                 </Button>
