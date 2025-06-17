@@ -27,7 +27,7 @@ import {
 // Mock data - will be replaced with real data later
 const dashboardStats = [
   {
-    title: 'Total Jobs',
+    title: 'Total Open Jobs',
     value: '24',
     change: '+12%',
     changeType: 'positive',
@@ -35,7 +35,7 @@ const dashboardStats = [
     color: 'primary',
   },
   {
-    title: 'Active Candidates',
+    title: 'Active Contractors',
     value: '156',
     change: '+8%',
     changeType: 'positive',
@@ -51,7 +51,7 @@ const dashboardStats = [
     color: 'success',
   },
   {
-    title: 'Placements This Month',
+    title: 'Permanent Placements This Month',
     value: '7',
     change: '+40%',
     changeType: 'positive',
