@@ -226,7 +226,7 @@ const Login = () => {
               <Typography variant="body2" color="text.secondary">
                 Don't have an account?{' '}
                 <Link
-                  to="/register"
+                  to="/signup"
                   style={{
                     color: 'inherit',
                     fontWeight: 'bold',
