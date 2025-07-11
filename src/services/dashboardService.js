@@ -120,7 +120,7 @@ export const dashboardService = {
 
       return formattedInterviews;
     } catch (error) {
-      throw new Error("Failed to fetch today's interviews: " + error.message);
+      throw new Error("No interviews set for today: " + error.message);
     }
   }
 };
