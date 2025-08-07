@@ -9,15 +9,18 @@ export const interviewService = {
     try {
       const { data, error } = await supabase
         .from("applications")
-        .select("status")
+        .select("submitted_to_client_date")
         .eq("id", applicationId)
         .single();
 
       if (error) throw error;
-      
-      return data?.status === "submitted-to-client";
+
+      // Check if submitted_to_client_date is not null
+      return data?.submitted_to_client_date !== null;
     } catch (error) {
-      throw new Error("Failed to check interview eligibility: " + error.message);
+      throw new Error(
+        "Failed to check interview eligibility: " + error.message
+      );
     }
   },
 
@@ -29,18 +32,20 @@ export const interviewService = {
     try {
       let query = supabase
         .from("applications")
-        .select(`
-          *,
-          candidate:candidates(id, first_name, last_name),
-          job:jobs(id, title, company:companies(id, name))
-        `)
-        .eq("status", "submitted-to-client")
+        .select(
+          `
+        *,
+        candidate:candidates(id, first_name, last_name),
+        job:jobs(id, title, company:companies(id, name))
+      `
+        )
+        .not("submitted_to_client_date", "is", null) // Not null means submitted
         .order("created_at", { ascending: false });
 
       if (candidateId) {
         query = query.eq("candidate_id", candidateId);
       }
-      
+
       if (jobId) {
         query = query.eq("job_id", jobId);
       }
@@ -50,7 +55,9 @@ export const interviewService = {
 
       return data || [];
     } catch (error) {
-      throw new Error("Failed to fetch eligible applications: " + error.message);
+      throw new Error(
+        "Failed to fetch eligible applications: " + error.message
+      );
     }
   },
 
@@ -59,27 +66,25 @@ export const interviewService = {
    */
   async getCompanyContacts(jobId) {
     try {
-      const { data, error } = await supabase
+      // First get the company_id from the job
+      const { data: job, error: jobError } = await supabase
         .from("jobs")
-        .select(`
-          company_id,
-          company:companies(
-            company_contacts(
-              id,
-              first_name,
-              last_name,
-              email,
-              title,
-              is_primary
-            )
-          )
-        `)
+        .select("company_id")
         .eq("id", jobId)
         .single();
 
-      if (error) throw error;
-      
-      return data?.company?.company_contacts || [];
+      if (jobError) throw jobError;
+
+      // Then get the contacts for that company
+      const { data: contacts, error: contactsError } = await supabase
+        .from("company_contacts")
+        .select("id, first_name, last_name, email, title, is_primary")
+        .eq("company_id", job.company_id)
+        .order("is_primary", { ascending: false }); // Primary contacts first
+
+      if (contactsError) throw contactsError;
+
+      return contacts || [];
     } catch (error) {
       throw new Error("Failed to fetch company contacts: " + error.message);
     }
@@ -91,12 +96,18 @@ export const interviewService = {
   async scheduleInterview(interviewData) {
     try {
       // First check if the application is eligible
-      const canSchedule = await this.canScheduleInterview(interviewData.application_id);
+      const canSchedule = await this.canScheduleInterview(
+        interviewData.application_id
+      );
       if (!canSchedule) {
-        throw new Error("Candidate must be submitted to client before scheduling interviews");
+        throw new Error(
+          "Candidate must be submitted to client before scheduling interviews"
+        );
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       // Create the interview record
@@ -105,15 +116,17 @@ export const interviewService = {
         .insert({
           ...interviewData,
           user_id: user.id,
-          status: "scheduled"
+          status: "scheduled",
         })
-        .select(`
+        .select(
+          `
           *,
           application:applications(
             candidate:candidates(id, first_name, last_name),
             job:jobs(id, title, company:companies(id, name))
           )
-        `)
+        `
+        )
         .single();
 
       if (interviewError) throw interviewError;
@@ -135,11 +148,14 @@ export const interviewService = {
       const activityData = {
         entity_type: "candidate",
         entity_id: interviewData.application.candidate.id,
-        type: "interview",
+        activity_type: "interview",
         subject: `Interview Scheduled - ${interviewData.application.job.title}`,
-        description: `${interviewData.interview_type} interview scheduled for ${new Date(interviewData.scheduled_date).toLocaleDateString()}`,
+        description: `${
+          interviewData.interview_type
+        } interview scheduled for ${new Date(
+          interviewData.scheduled_date
+        ).toLocaleDateString()}`,
         scheduled_date: interviewData.scheduled_date,
-        status: "scheduled"
       };
 
       return await activityService.createActivity(activityData);
@@ -155,13 +171,15 @@ export const interviewService = {
     try {
       const { data, error } = await supabase
         .from("interviews")
-        .select(`
+        .select(
+          `
           *,
           application:applications(
             candidate:candidates(id, first_name, last_name, email),
             job:jobs(id, title, company:companies(id, name))
           )
-        `)
+        `
+        )
         .eq("id", id)
         .single();
 
@@ -183,13 +201,15 @@ export const interviewService = {
 
       const { data, error } = await supabase
         .from("interviews")
-        .select(`
+        .select(
+          `
           *,
           application:applications(
             candidate:candidates(id, first_name, last_name),
             job:jobs(id, title, company:companies(id, name))
           )
-        `)
+        `
+        )
         .gte("scheduled_date", startOfDay)
         .lte("scheduled_date", endOfDay)
         .eq("status", "scheduled")
@@ -212,16 +232,18 @@ export const interviewService = {
         .update({
           ...completionData,
           status: "completed",
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", interviewId)
-        .select(`
+        .select(
+          `
           *,
           application:applications(
             candidate:candidates(id, first_name, last_name),
             job:jobs(id, title)
           )
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
@@ -245,16 +267,17 @@ export const interviewService = {
       const activityData = {
         entity_type: "candidate",
         entity_id: interviewData.application.candidate.id,
-        type: "interview",
+        activity_type: "interview",
         subject: `Interview ${newStatus} - ${interviewData.application.job.title}`,
-        description: `Interview ${newStatus} on ${new Date(interviewData.scheduled_date).toLocaleDateString()}`,
+        description: `Interview ${newStatus} on ${new Date(
+          interviewData.scheduled_date
+        ).toLocaleDateString()}`,
         scheduled_date: new Date().toISOString(),
-        status: newStatus
       };
 
       return await activityService.createActivity(activityData);
     } catch (error) {
       throw new Error("Failed to update interview activity: " + error.message);
     }
-  }
+  },
 };
