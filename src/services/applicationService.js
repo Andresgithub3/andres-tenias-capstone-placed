@@ -1,5 +1,22 @@
 import { supabase } from "../api/client/supabase";
 
+// Add the helper function
+const getUserOrganization = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: member, error } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) throw new Error("User not member of any organization");
+  return member.organization_id;
+};
+
 export const applicationService = {
   async create(applicationData) {
     try {
@@ -8,11 +25,14 @@ export const applicationService = {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("applications")
         .insert({
           ...applicationData,
           user_id: user.id,
+          organization_id: organizationId,
           status: "associated",
         })
         .select()
@@ -27,15 +47,18 @@ export const applicationService = {
 
   async getForCandidate(candidateId) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("applications")
         .select(
           `
         *,
-        job(id, title, status, companies(id, name))
+        job:jobs(id, title, status, company:companies(id, name))
       `
         )
         .eq("candidate_id", candidateId)
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -47,12 +70,15 @@ export const applicationService = {
 
   async checkExisting(candidateId, jobId) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("applications")
         .select("id")
         .eq("candidate_id", candidateId)
         .eq("job_id", jobId)
-        .maybesSingle();
+        .eq("organization_id", organizationId)
+        .maybeSingle();
 
       if (error) throw error;
       return data ? true : false;
@@ -79,23 +105,27 @@ export const applicationService = {
       throw new Error("Failed to update application status: " + error.message);
     }
   },
+
   async getForJob(jobId) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("applications")
         .select(
           `
-          *,
-          candidate:candidates(
-            id,
-            first_name,
-            last_name,
-            email,
-            phone
-          )
-        `
+        *,
+        candidate:candidates(
+          id,
+          first_name,
+          last_name,
+          email,
+          phone
+        )
+      `
         )
         .eq("job_id", jobId)
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

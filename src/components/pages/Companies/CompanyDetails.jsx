@@ -26,7 +26,7 @@ import {
   LocationOn as LocationIcon,
   ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material";
-import { companyService } from "../../../services/companyServices";
+import { companyService } from "../../../services/companyService";
 import CompanyOverviewTab from "./CompaniesOverviewTab";
 import CompanyJobsTab from "./CompanyJobsTab";
 import CompanyDocumentsTab from "./CompanyDocumentsTab";

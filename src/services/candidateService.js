@@ -1,14 +1,33 @@
 import { supabase } from "../api/client/supabase";
 
+const getUserOrganization = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: member, error } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) throw new Error("User not member of any organization");
+  return member.organization_id;
+};
+
 export const candidateService = {
   /**
    * Get all candidates for the current user
    */
   async getAll(filters = {}) {
     try {
+      const organizationId = await getUserOrganization();
+
       let query = supabase
         .from("candidates")
         .select("*")
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
 
       // Add filters if needed
@@ -32,11 +51,14 @@ export const candidateService = {
    */
   async getById(id) {
     try {
+      const organizationId = await getUserOrganization();
+
       // First, get the candidate basic info
       const { data: candidate, error: candidateError } = await supabase
         .from("candidates")
         .select("*")
         .eq("id", id)
+        .eq("organization_id", organizationId)
         .single();
 
       if (candidateError) throw candidateError;
@@ -47,6 +69,7 @@ export const candidateService = {
         .select("*")
         .eq("entity_type", "candidate")
         .eq("entity_id", id)
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
 
       if (documentsError) throw documentsError;
@@ -56,18 +79,19 @@ export const candidateService = {
         .from("applications")
         .select(
           `
-          *,
-          job:jobs(
+        *,
+        job:jobs(
+          id,
+          title,
+          company:companies(
             id,
-            title,
-            company:companies(
-              id,
-              name
-            )
+            name
           )
-        `
+        )
+      `
         )
         .eq("candidate_id", id)
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
 
       if (applicationsError) throw applicationsError;
@@ -93,11 +117,14 @@ export const candidateService = {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("candidates")
         .insert({
           ...candidateData,
           user_id: user.id,
+          organization_id: organizationId,
         })
         .select()
         .single();

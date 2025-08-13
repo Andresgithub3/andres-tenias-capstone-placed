@@ -12,7 +12,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { companyService } from "../../../services/companyServices";
+import { companyService } from "../../../services/companyService";
 
 const COMPANY_SIZES = [
   { value: "1-10", label: "1-10 employees" },

@@ -24,6 +24,7 @@ import {
   Email as EmailIcon,
   LocationOn as LocationIcon,
   Work as WorkIcon,
+  Event as EventIcon,
 } from "@mui/icons-material";
 import { candidateService } from "../../../services/candidateService";
 import OverviewTab from "./OverviewTab";
@@ -31,6 +32,7 @@ import DocumentsTab from "./DocumentsTab";
 import ActivityTab from "./ActivityTab";
 import JobAssociationDialog from "./JobAssociationDialog";
 import ApplicationsTab from "./ApplicationsTab";
+import ScheduleInterviewDialog from "../../interviews/ScheduleInterviewDialog";
 
 // Pipeline stages
 const PIPELINE_STAGES = [
@@ -52,6 +54,7 @@ const CandidateDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [actionsAnchor, setActionsAnchor] = useState(null);
   const [jobAssociationOpen, setJobAssociationOpen] = useState(false);
+  const [scheduleInterviewOpen, setScheduleInterviewOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -66,6 +69,7 @@ const CandidateDetail = () => {
       setError(err.message);
     }
   };
+  
   // Load candidate data
   useEffect(() => {
     loadCandidate();
@@ -86,11 +90,27 @@ const CandidateDetail = () => {
 
   const handleJobAssociation = () => {
     setJobAssociationOpen(true);
+    handleActionsClose();
+  };
+
+  const handleScheduleInterview = () => {
+    setScheduleInterviewOpen(true);
+    handleActionsClose();
   };
 
   const handleJobAssociationSuccess = (message) => {
     setSnackbar({ open: true, message, severity: "success" });
     // Refresh candidate data to show new applications
+    loadCandidate();
+  };
+
+  const handleInterviewScheduled = (interview) => {
+    setSnackbar({ 
+      open: true, 
+      message: `Interview scheduled successfully for ${new Date(interview.scheduled_date).toLocaleDateString()}`, 
+      severity: "success" 
+    });
+    // Refresh candidate data to show new activities
     loadCandidate();
   };
 
@@ -113,6 +133,11 @@ const CandidateDetail = () => {
     }, 0);
 
     return maxStageIndex;
+  };
+
+  // Check if candidate has any applications submitted to client
+  const hasSubmittedApplications = () => {
+    return candidate?.applications?.some(app => app.submitted_to_client_date) || false;
   };
 
   // Handle actions menu
@@ -202,6 +227,17 @@ const CandidateDetail = () => {
               </ListItemIcon>
               <ListItemText>Associate with Job</ListItemText>
             </MenuItem>
+            
+            <MenuItem 
+              onClick={handleScheduleInterview}
+              disabled={!hasSubmittedApplications()}
+            >
+              <ListItemIcon>
+                <EventIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Schedule Interview</ListItemText>
+            </MenuItem>
+            
             <MenuItem onClick={handleSubmitToClient}>Submit to Client</MenuItem>
             <MenuItem onClick={handleEditCandidate}>Edit Candidate</MenuItem>
           </Menu>
@@ -279,12 +315,21 @@ const CandidateDetail = () => {
           />
         )}
       </Paper>
+      
       {/* Job Association Dialog */}
       <JobAssociationDialog
         open={jobAssociationOpen}
         onClose={() => setJobAssociationOpen(false)}
         candidate={candidate}
         onSuccess={handleJobAssociationSuccess}
+      />
+
+      {/* Schedule Interview Dialog */}
+      <ScheduleInterviewDialog
+        open={scheduleInterviewOpen}
+        onClose={() => setScheduleInterviewOpen(false)}
+        candidateId={candidate.id}
+        onInterviewScheduled={handleInterviewScheduled}
       />
 
       {/* Success Snackbar */}

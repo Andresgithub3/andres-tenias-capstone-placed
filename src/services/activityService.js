@@ -1,17 +1,37 @@
 import { supabase } from "../api/client/supabase";
 
+// Add the helper function
+const getUserOrganization = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: member, error } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) throw new Error("User not member of any organization");
+  return member.organization_id;
+};
+
 export const activityService = {
   /**
    * Get activities for a specific entity
    */
   async getActivitiesForEntity(entityType, entityId) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("activities")
         .select("*")
         .eq("entity_type", entityType)
         .eq("entity_id", entityId)
-        .order("scheduled_date", { ascending: false }); // Use scheduled_date for chronological order
+        .eq("organization_id", organizationId)
+        .order("scheduled_date", { ascending: false });
 
       if (error) throw error;
       return data || [];
@@ -30,11 +50,14 @@ export const activityService = {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("activities")
         .insert({
           ...activityData,
           user_id: user.id,
+          organization_id: organizationId,
         })
         .select()
         .single();
@@ -81,11 +104,14 @@ export const activityService = {
 
   async getByEntity(entityType, entityId) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("activities")
         .select("*")
         .eq("entity_type", entityType)
         .eq("entity_id", entityId)
+        .eq("organization_id", organizationId)
         .order("scheduled_date", { ascending: false });
 
       if (error) throw error;

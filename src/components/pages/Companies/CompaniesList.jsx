@@ -30,7 +30,7 @@ import {
   Business as BusinessIcon,
 } from "@mui/icons-material";
 import { format } from "date-fns";
-import { companyService } from "../../../services/companyServices";
+import { companyService } from "../../../services/companyService";
 
 const CompaniesList = () => {
   const navigate = useNavigate();

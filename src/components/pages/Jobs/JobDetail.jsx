@@ -12,17 +12,26 @@ import {
   CircularProgress,
   Alert,
   Chip,
+  Snackbar,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   ArrowDropDown as ArrowDropDownIcon,
   Business as BusinessIcon,
   LocationOn as LocationIcon,
   AttachMoney as SalaryIcon,
+  Edit as EditIcon,
+  ChangeCircle as ChangeCircleIcon,
+  Person as PersonIcon,
+  Delete as DeleteIcon,
+  Event as EventIcon,
 } from "@mui/icons-material";
 import { jobService } from "../../../services/jobService";
 import JobOverviewTab from "./JobOverviewTab";
 import AssociatedCandidatesTab from "./AssociatedCandidatesTab";
 import JobActivityTab from "./JobActivityTab";
+import ScheduleInterviewDialog from "../../interviews/ScheduleInterviewDialog";
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -34,6 +43,12 @@ const JobDetail = () => {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [actionsAnchor, setActionsAnchor] = useState(null);
+  const [scheduleInterviewOpen, setScheduleInterviewOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   // Load job data
   useEffect(() => {
@@ -62,6 +77,13 @@ const JobDetail = () => {
     }
   };
 
+  // Check if job has any submitted candidates
+  const hasSubmittedCandidates = () => {
+    // This would need to be implemented based on your data structure
+    // You might need to check applications or add this data to the job service
+    return true; // For now, always enable - you can enhance this later
+  };
+
   // Handle actions menu
   const handleActionsClick = (event) => {
     setActionsAnchor(event.currentTarget);
@@ -88,10 +110,31 @@ const JobDetail = () => {
     console.log("Associate candidate clicked");
   };
 
+  const handleScheduleInterview = () => {
+    setScheduleInterviewOpen(true);
+    handleActionsClose();
+  };
+
+  const handleInterviewScheduled = (interview) => {
+    setSnackbar({
+      open: true,
+      message: `Interview scheduled successfully for ${new Date(
+        interview.scheduled_date
+      ).toLocaleDateString()}`,
+      severity: "success",
+    });
+    // Refresh job data to show updated information
+    refreshJob();
+  };
+
   const handleDeleteJob = () => {
     handleActionsClose();
     // TODO: Implement delete with confirmation
     console.log("Delete job clicked");
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ open: false, message: "", severity: "success" });
   };
 
   // Handle tab changes
@@ -189,12 +232,43 @@ const JobDetail = () => {
             open={Boolean(actionsAnchor)}
             onClose={handleActionsClose}
           >
-            <MenuItem onClick={handleEditJob}>Edit Job</MenuItem>
-            <MenuItem onClick={handleChangeStatus}>Change Status</MenuItem>
-            <MenuItem onClick={handleAssociateCandidate}>
-              Associate Candidate
+            <MenuItem onClick={handleEditJob}>
+              <ListItemIcon>
+                <EditIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Edit Job</ListItemText>
             </MenuItem>
-            <MenuItem onClick={handleDeleteJob}>Delete Job</MenuItem>
+
+            <MenuItem onClick={handleChangeStatus}>
+              <ListItemIcon>
+                <ChangeCircleIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Change Status</ListItemText>
+            </MenuItem>
+
+            <MenuItem onClick={handleAssociateCandidate}>
+              <ListItemIcon>
+                <PersonIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Associate Candidate</ListItemText>
+            </MenuItem>
+
+            <MenuItem
+              onClick={handleScheduleInterview}
+              disabled={!hasSubmittedCandidates()}
+            >
+              <ListItemIcon>
+                <EventIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Schedule Interview</ListItemText>
+            </MenuItem>
+
+            <MenuItem onClick={handleDeleteJob}>
+              <ListItemIcon>
+                <DeleteIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Delete Job</ListItemText>
+            </MenuItem>
           </Menu>
         </Box>
 
@@ -280,13 +354,35 @@ const JobDetail = () => {
         {activeTab === 1 && (
           <AssociatedCandidatesTab job={job} onRefresh={refreshJob} />
         )}
-        {activeTab === 2 && (
-          <JobActivityTab job={job} />
-        )}
+        {activeTab === 2 && <JobActivityTab job={job} />}
         {activeTab === 3 && (
           <Typography>Job Documents content will go here</Typography>
         )}
       </Paper>
+
+      {/* Schedule Interview Dialog */}
+      <ScheduleInterviewDialog
+        open={scheduleInterviewOpen}
+        onClose={() => setScheduleInterviewOpen(false)}
+        jobId={job.id}
+        onInterviewScheduled={handleInterviewScheduled}
+      />
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

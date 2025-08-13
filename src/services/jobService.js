@@ -1,11 +1,31 @@
 import { supabase } from "../api/client/supabase";
 
+//helper function
+const getUserOrganization = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: member, error } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) throw new Error("User not member of any organization");
+  return member.organization_id;
+};
+
 export const jobService = {
   async getAll(filters = {}) {
     try {
+      const organizationId = await getUserOrganization(); // This line needs the 'await'
+
       let query = supabase
         .from("jobs")
         .select(`*, company:companies(id, name)`)
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
 
       // Add filters if needed
@@ -26,12 +46,7 @@ export const jobService = {
     try {
       const { data, error } = await supabase
         .from("jobs")
-        .select(
-          `
-                    *,
-                    company:companies(id, name, city, state)
-                `
-        )
+        .select(`*, company:companies(id, name, city, state) `)
         .eq("id", id)
         .single();
 
@@ -50,11 +65,14 @@ export const jobService = {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("jobs")
         .insert({
           ...jobData,
           user_id: user.id,
+          organization_id: organizationId,
         })
         .select(`*, company:companies(id, name)`)
         .single();
