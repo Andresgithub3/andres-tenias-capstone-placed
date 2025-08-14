@@ -25,6 +25,8 @@ import JobDetail from "./components/pages/Jobs/JobDetail";
 import CompaniesList from "./components/pages/Companies/CompaniesList";
 import CompanyForm from "./components/pages/Companies/CompanyForm";
 import CompanyDetail from "./components/pages/Companies/CompanyDetails";
+import TeamManagement from "./components/pages/Team/TeamManagement";
+import InvitationAcceptance from "./components/pages/Team/InvitationAcceptance";
 
 // Loading Component
 const LoadingScreen = () => (
@@ -97,6 +99,12 @@ function App() {
           }
         />
 
+        {/* Invitation acceptance (public) */}
+        <Route
+          path="/invite/:invitationCode"
+          element={<InvitationAcceptance />}
+        />
+
         {/* Protected Routes with Layout */}
         <Route
           path="/"
@@ -121,6 +129,7 @@ function App() {
           <Route path="companies/new" element={<CompanyForm />} />
           <Route path="companies/:id/edit" element={<CompanyForm />} />
           <Route path="companies/:id" element={<CompanyDetail />} />
+          <Route path="team" element={<TeamManagement />} />
         </Route>
 
         {/* Catch all route */}

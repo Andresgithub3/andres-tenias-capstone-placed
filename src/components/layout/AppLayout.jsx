@@ -32,6 +32,7 @@ import {
   Business as BusinessIcon,
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
+  Groups as GroupsIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme as useThemeContext } from '../../theme context/ThemContext';
@@ -53,9 +54,10 @@ const AppLayout = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Jobs', icon: <WorkIcon />, path: '/jobs' },
     { text: 'Candidates', icon: <PeopleIcon />, path: '/candidates' },
-    { text: 'Interviews', icon: <CalendarIcon />, path: '/interviews' },
+    // { text: 'Interviews', icon: <CalendarIcon />, path: '/interviews' },
     { text: 'Companies', icon: <BusinessIcon />, path: '/companies' },
-    { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
+    // { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
+    { text: 'Team', icon: <GroupsIcon />, path: '/team' },
   ];
 
   const handleDrawerToggle = () => {
