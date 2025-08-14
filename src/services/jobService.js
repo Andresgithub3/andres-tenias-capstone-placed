@@ -44,10 +44,29 @@ export const jobService = {
 
   async getById(id) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("jobs")
-        .select(`*, company:companies(id, name, city, state) `)
+        .select(
+          `
+        *,
+        company:companies(id, name, city, state),
+        applications(
+          id,
+          status,
+          submitted_to_client_date,
+          candidate:candidates(
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        )
+        `
+        )
         .eq("id", id)
+        .eq("organization_id", organizationId)
         .single();
 
       if (error) throw error;

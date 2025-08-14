@@ -79,9 +79,14 @@ const JobDetail = () => {
 
   // Check if job has any submitted candidates
   const hasSubmittedCandidates = () => {
-    // This would need to be implemented based on your data structure
-    // You might need to check applications or add this data to the job service
-    return true; // For now, always enable - you can enhance this later
+    if (!job?.applications || job.applications.length === 0) {
+      return false;
+    }
+
+    // Check if any applications have been submitted to client
+    return job.applications.some(
+      (app) => app.submitted_to_client_date !== null
+    );
   };
 
   // Handle actions menu
@@ -256,11 +261,27 @@ const JobDetail = () => {
             <MenuItem
               onClick={handleScheduleInterview}
               disabled={!hasSubmittedCandidates()}
+              title={
+                !hasSubmittedCandidates()
+                  ? "No candidates have been submitted to client yet"
+                  : ""
+              }
             >
               <ListItemIcon>
                 <EventIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>Schedule Interview</ListItemText>
+              <ListItemText>
+                Schedule Interview
+                {!hasSubmittedCandidates() && (
+                  <Typography
+                    variant="caption"
+                    display="block"
+                    color="text.secondary"
+                  >
+                    (No submitted candidates)
+                  </Typography>
+                )}
+              </ListItemText>
             </MenuItem>
 
             <MenuItem onClick={handleDeleteJob}>
