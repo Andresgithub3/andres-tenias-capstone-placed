@@ -1,5 +1,21 @@
 import { supabase } from "../api/client/supabase";
 
+const getUserOrganization = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: member, error } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) throw error;
+  return member.organization_id;
+};
+
 export const companyContactService = {
   /**
    * Get all contacts for a company
@@ -48,16 +64,13 @@ export const companyContactService = {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      // If this contact is being set as primary, unset other primary contacts
-      if (contactData.is_primary) {
-        await this.unsetPrimaryContacts(contactData.company_id);
-      }
+      const organizationId = await getUserOrganization();
 
       const { data, error } = await supabase
         .from("company_contacts")
         .insert({
           ...contactData,
-          user_id: user.id,
+          organization_id: organizationId,
         })
         .select()
         .single();
