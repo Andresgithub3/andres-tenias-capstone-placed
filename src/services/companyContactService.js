@@ -102,6 +102,7 @@ export const companyContactService = {
         .from("company_contacts")
         .update(contactData)
         .eq("id", id)
+        .eq("organization_id", organizationId)
         .select()
         .single();
 
@@ -120,7 +121,8 @@ export const companyContactService = {
       const { error } = await supabase
         .from("company_contacts")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .eq("organization_id", organizationId);
 
       if (error) throw error;
       return true;
