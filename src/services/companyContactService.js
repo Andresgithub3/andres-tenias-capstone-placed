@@ -22,10 +22,13 @@ export const companyContactService = {
    */
   async getByCompany(companyId) {
     try {
+      const organizationId = await getUserOrganization();
+
       const { data, error } = await supabase
         .from("company_contacts")
         .select("*")
         .eq("company_id", companyId)
+        .eq("organization_id", organizationId)
         .order("is_primary", { ascending: false })
         .order("name", { ascending: true });
 
@@ -45,6 +48,7 @@ export const companyContactService = {
         .from("company_contacts")
         .select("*")
         .eq("id", id)
+        .eq("organization_id", organizationId)
         .single();
 
       if (error) throw error;
@@ -133,6 +137,7 @@ export const companyContactService = {
         .from("company_contacts")
         .update({ is_primary: false })
         .eq("company_id", companyId)
+        .eq("organization_id", organizationId)
         .eq("is_primary", true);
 
       if (excludeId) {
@@ -156,6 +161,7 @@ export const companyContactService = {
         .from("company_contacts")
         .select("id, name, title")
         .eq("company_id", companyId)
+        .eq("organization_id", organizationId)
         .order("is_primary", { ascending: false })
         .order("name", { ascending: true });
 
@@ -177,6 +183,7 @@ export const companyContactService = {
         .from("company_contacts")
         .select("*")
         .eq("company_id", companyId)
+        .eq("organization_id", organizationId)
         .eq("is_primary", true)
         .single();
 
