@@ -83,7 +83,8 @@ const CompanyOverviewTab = ({ company, onCompanyChange }) => {
   const handleAddContact = () => {
     setEditingContact(null);
     reset({
-      name: "",
+      first_name: "",
+      last_name: "",
       title: "",
       email: "",
       phone: "",
