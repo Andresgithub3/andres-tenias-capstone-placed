@@ -106,7 +106,7 @@ const CompanyActivityTab = ({ company, onCompanyChange }) => {
   const getContactName = (contactId) => {
     if (!contactId) return null;
     const contact = contacts.find((c) => c.id === contactId);
-    return contact ? contact.name : "Unknown Contact";
+    return contact ? contact.first_name : "Unknown Contact";
   };
 
   if (loading) {

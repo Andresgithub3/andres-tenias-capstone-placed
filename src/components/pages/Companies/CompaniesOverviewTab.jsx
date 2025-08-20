@@ -51,7 +51,8 @@ const CompanyOverviewTab = ({ company, onCompanyChange }) => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      name: "",
+      first_name: "",
+      last_name: "",
       title: "",
       email: "",
       phone: "",
@@ -257,7 +258,7 @@ const CompanyOverviewTab = ({ company, onCompanyChange }) => {
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   <Box>
                     <Typography variant="subtitle1" fontWeight="medium">
-                      {primaryContact.name}
+                      {primaryContact.first_name} {primaryContact.last_name}
                     </Typography>
                     {primaryContact.title && (
                       <Typography variant="body2" color="text.secondary">
@@ -412,7 +413,7 @@ const CompanyOverviewTab = ({ company, onCompanyChange }) => {
                         }
                       >
                         <ListItemText
-                          primary={`${contact.name}${
+                          primary={`${contact.first_name}${contact.last_name}${
                             contact.is_primary ? " (Primary)" : ""
                           }`}
                           secondary={[
@@ -461,13 +462,29 @@ const CompanyOverviewTab = ({ company, onCompanyChange }) => {
               sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
             >
               <Controller
-                name="name"
+                name="first_name"
                 control={control}
-                rules={{ required: "Name is required" }}
+                rules={{ required: "First name is required" }}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Full Name"
+                    label="First Name"
+                    fullWidth
+                    required
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                name="last_name"
+                control={control}
+                rules={{ required: "Last name is required" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Last Name"
                     fullWidth
                     required
                     error={!!errors.name}
