@@ -30,7 +30,7 @@ export const companyContactService = {
         .eq("company_id", companyId)
         .eq("organization_id", organizationId)
         .order("is_primary", { ascending: false })
-        .order("name", { ascending: true });
+        .order("first_name", { ascending: true });
 
       if (error) throw error;
       return data || [];
@@ -163,7 +163,7 @@ export const companyContactService = {
         .eq("company_id", companyId)
         .eq("organization_id", organizationId)
         .order("is_primary", { ascending: false })
-        .order("name", { ascending: true });
+        .order("first_name", { ascending: true });
 
       if (error) throw error;
       return data || [];
