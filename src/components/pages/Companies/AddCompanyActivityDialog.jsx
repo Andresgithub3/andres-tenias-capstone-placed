@@ -168,7 +168,7 @@ const AddCompanyActivityDialog = ({
               </MenuItem>
               {contacts.map((contact) => (
                 <MenuItem key={contact.id} value={contact.id}>
-                  {contact.name}
+                  {contact.first_name} {contact.last_name}
                   {contact.title && ` - ${contact.title}`}
                   {contact.is_primary && " (Primary)"}
                 </MenuItem>
