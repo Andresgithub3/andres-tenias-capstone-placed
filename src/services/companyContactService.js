@@ -74,6 +74,7 @@ export const companyContactService = {
         .from("company_contacts")
         .insert({
           ...contactData,
+          user_id: user.id,
           organization_id: organizationId,
         })
         .select()
