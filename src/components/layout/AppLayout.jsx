@@ -33,6 +33,7 @@ import {
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
   Groups as GroupsIcon,
+  Bookmarks as BookmarksIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme as useThemeContext } from '../../theme context/ThemContext';
@@ -56,6 +57,7 @@ const AppLayout = () => {
     { text: 'Candidates', icon: <PeopleIcon />, path: '/candidates' },
     // { text: 'Interviews', icon: <CalendarIcon />, path: '/interviews' },
     { text: 'Companies', icon: <BusinessIcon />, path: '/companies' },
+    { text: 'Shortlists', icon: <BookmarksIcon />, path: '/shortlists' },
     // { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
     { text: 'Team', icon: <GroupsIcon />, path: '/team' },
   ];

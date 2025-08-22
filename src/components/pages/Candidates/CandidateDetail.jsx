@@ -25,6 +25,7 @@ import {
   LocationOn as LocationIcon,
   Work as WorkIcon,
   Event as EventIcon,
+  Bookmarks as BookmarksIcon,
 } from "@mui/icons-material";
 import { candidateService } from "../../../services/candidateService";
 import OverviewTab from "./OverviewTab";
@@ -33,6 +34,7 @@ import ActivityTab from "./ActivityTab";
 import JobAssociationDialog from "./JobAssociationDialog";
 import ApplicationsTab from "./ApplicationsTab";
 import ScheduleInterviewDialog from "../../interviews/ScheduleInterviewDialog";
+import AddToShortlistDialog from "../Shortlists/AddtoShortlistDialog";
 
 // Pipeline stages
 const PIPELINE_STAGES = [
@@ -55,6 +57,7 @@ const CandidateDetail = () => {
   const [actionsAnchor, setActionsAnchor] = useState(null);
   const [jobAssociationOpen, setJobAssociationOpen] = useState(false);
   const [scheduleInterviewOpen, setScheduleInterviewOpen] = useState(false);
+  const [addToShortlistOpen, setAddToShortlistOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -69,7 +72,7 @@ const CandidateDetail = () => {
       setError(err.message);
     }
   };
-  
+
   // Load candidate data
   useEffect(() => {
     loadCandidate();
@@ -105,10 +108,12 @@ const CandidateDetail = () => {
   };
 
   const handleInterviewScheduled = (interview) => {
-    setSnackbar({ 
-      open: true, 
-      message: `Interview scheduled successfully for ${new Date(interview.scheduled_date).toLocaleDateString()}`, 
-      severity: "success" 
+    setSnackbar({
+      open: true,
+      message: `Interview scheduled successfully for ${new Date(
+        interview.scheduled_date
+      ).toLocaleDateString()}`,
+      severity: "success",
     });
     // Refresh candidate data to show new activities
     loadCandidate();
@@ -116,6 +121,16 @@ const CandidateDetail = () => {
 
   const handleSnackbarClose = () => {
     setSnackbar({ open: false, message: "", severity: "success" });
+  };
+
+  //shortlist functionality
+  const handleAddToShortlist = () => {
+    setAddToShortlistOpen(true);
+    handleActionsClose();
+  };
+
+  const handleShortlistSuccess = (message) => {
+    setSnackbar({ open: true, message, severity: "success" });
   };
 
   // Calculate highest pipeline stage
@@ -137,7 +152,10 @@ const CandidateDetail = () => {
 
   // Check if candidate has any applications submitted to client
   const hasSubmittedApplications = () => {
-    return candidate?.applications?.some(app => app.submitted_to_client_date) || false;
+    return (
+      candidate?.applications?.some((app) => app.submitted_to_client_date) ||
+      false
+    );
   };
 
   // Handle actions menu
@@ -227,8 +245,8 @@ const CandidateDetail = () => {
               </ListItemIcon>
               <ListItemText>Associate with Job</ListItemText>
             </MenuItem>
-            
-            <MenuItem 
+
+            <MenuItem
               onClick={handleScheduleInterview}
               disabled={!hasSubmittedApplications()}
             >
@@ -237,7 +255,14 @@ const CandidateDetail = () => {
               </ListItemIcon>
               <ListItemText>Schedule Interview</ListItemText>
             </MenuItem>
-            
+
+            <MenuItem onClick={handleAddToShortlist}>
+              <ListItemIcon>
+                <BookmarksIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Add to Shortlist</ListItemText>
+            </MenuItem>
+
             <MenuItem onClick={handleSubmitToClient}>Submit to Client</MenuItem>
             <MenuItem onClick={handleEditCandidate}>Edit Candidate</MenuItem>
           </Menu>
@@ -315,7 +340,7 @@ const CandidateDetail = () => {
           />
         )}
       </Paper>
-      
+
       {/* Job Association Dialog */}
       <JobAssociationDialog
         open={jobAssociationOpen}
@@ -330,6 +355,15 @@ const CandidateDetail = () => {
         onClose={() => setScheduleInterviewOpen(false)}
         candidateId={candidate.id}
         onInterviewScheduled={handleInterviewScheduled}
+      />
+
+      {/* shortlist dialog */}
+      <AddToShortlistDialog
+        open={addToShortlistOpen}
+        onClose={() => setAddToShortlistOpen(false)}
+        candidateId={candidate.id}
+        candidateName={`${candidate.first_name} ${candidate.last_name}`}
+        onSuccess={handleShortlistSuccess}
       />
 
       {/* Success Snackbar */}

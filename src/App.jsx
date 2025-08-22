@@ -27,6 +27,9 @@ import CompanyForm from "./components/pages/Companies/CompanyForm";
 import CompanyDetail from "./components/pages/Companies/CompanyDetails";
 import TeamManagement from "./components/pages/Team/TeamManagement";
 import InvitationAcceptance from "./components/pages/Team/InvitationAcceptance";
+import ShortlistsList from "./components/pages/Shortlists/ShortlistsList";
+import ShortlistDetail from "./components/pages/Shortlists/ShortlistDetail";
+import ShortlistForm from "./components/pages/Shortlists/ShortlistForm";
 
 // Loading Component
 const LoadingScreen = () => (
@@ -129,6 +132,10 @@ function App() {
           <Route path="companies/new" element={<CompanyForm />} />
           <Route path="companies/:id/edit" element={<CompanyForm />} />
           <Route path="companies/:id" element={<CompanyDetail />} />
+          <Route path="shortlists" element={<ShortlistsList />} />
+          <Route path="shortlists/:id" element={<ShortlistDetail />} />
+          <Route path="shortlists/new" element={<ShortlistForm />} />
+          <Route path="shortlists/:id/edit" element={<ShortlistForm />} />
           <Route path="team" element={<TeamManagement />} />
         </Route>
 
